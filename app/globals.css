@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -23,4 +24,96 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ===================== Resume Hunter dashboard ===================== */
+@keyframes rh-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes rh-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes rh-fade {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes rh-toast {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+.rh-app {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.rh-app *,
+.rh-app *::before,
+.rh-app *::after {
+  box-sizing: border-box;
+}
+.rh-app ::-webkit-scrollbar {
+  width: 11px;
+  height: 11px;
+}
+.rh-app ::-webkit-scrollbar-thumb {
+  background: #d6e0ee;
+  border-radius: 9px;
+  border: 3px solid #f4f7fc;
+}
+.rh-app ::-webkit-scrollbar-thumb:hover {
+  background: #c2d0e4;
+}
+.rh-app input::placeholder,
+.rh-app textarea::placeholder {
+  color: #9aa6ba;
+}
+
+/* interactive helpers */
+.rh-field:focus {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13) !important;
+  outline: none;
+}
+.rh-fieldwrap:focus-within {
+  border-color: #2563eb !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.13) !important;
+}
+.rh-icon:hover {
+  border-color: #2563eb !important;
+  color: #2563eb !important;
+}
+.rh-add:hover {
+  background: #eef4ff !important;
+  border-color: #2563eb !important;
+}
+.rh-soft:hover {
+  filter: brightness(1.05);
+}
+.rh-card:hover {
+  box-shadow: 0 10px 26px rgba(16, 31, 68, 0.1) !important;
+  border-color: #d8e2f1 !important;
+}
+.rh-del:hover {
+  color: #e0496a !important;
+  border-color: #f4cbd6 !important;
 }
