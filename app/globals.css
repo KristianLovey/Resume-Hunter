@@ -62,9 +62,31 @@ body {
   }
 }
 
-.rh-app {
+.rh-app,
+.rh-landing {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+html {
+  scroll-behavior: smooth;
+}
+@keyframes rh-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes rh-blob {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(20px, -16px) scale(1.06);
+  }
 }
 .rh-app *,
 .rh-app *::before,
@@ -116,4 +138,44 @@ body {
 .rh-del:hover {
   color: #e0496a !important;
   border-color: #f4cbd6 !important;
+}
+
+/* nedostajao je rh-pop keyframe — bez njega sekcije nisu imale animaciju */
+@keyframes rh-pop {
+  from {
+    opacity: 0;
+    transform: translateY(22px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ulazne animacije ekrana / sekcija (re-trigger na promjenu taba preko key=) */
+.rh-enter {
+  animation: rh-fade 0.45s ease both;
+}
+/* svaki glavni blok ekrana ulazi stepenasto (profil = sekcije, hunter/dashboard = blokovi) */
+.rh-enter section,
+.rh-enter > div > div {
+  animation: rh-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.rh-enter section:nth-of-type(1) {
+  animation-delay: 0.04s;
+}
+.rh-enter section:nth-of-type(2) {
+  animation-delay: 0.11s;
+}
+.rh-enter section:nth-of-type(3) {
+  animation-delay: 0.18s;
+}
+.rh-enter section:nth-of-type(4) {
+  animation-delay: 0.25s;
+}
+.rh-enter section:nth-of-type(5) {
+  animation-delay: 0.32s;
+}
+.rh-enter section:nth-of-type(6) {
+  animation-delay: 0.39s;
 }
