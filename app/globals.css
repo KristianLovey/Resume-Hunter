@@ -140,6 +140,30 @@ html {
   border-color: #f4cbd6 !important;
 }
 
+/* konzistentan hover / press feedback za SVE gumbe (landing + app) */
+.rh-btn,
+.rh-app button:not(:disabled):not(.rh-field) {
+  transition: transform 0.14s ease, box-shadow 0.16s ease, filter 0.16s ease,
+    background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+.rh-btn:hover,
+.rh-app button:not(:disabled):not(.rh-field):hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 22px -8px rgba(16, 31, 68, 0.3);
+}
+.rh-btn:active,
+.rh-app button:not(:disabled):not(.rh-field):active {
+  transform: translateY(1px) scale(0.96);
+  filter: brightness(0.95);
+}
+.rh-navlink {
+  transition: color 0.15s ease;
+}
+.rh-navlink:hover {
+  color: #2563eb !important;
+}
+
 /* nedostajao je rh-pop keyframe — bez njega sekcije nisu imale animaciju */
 @keyframes rh-pop {
   from {

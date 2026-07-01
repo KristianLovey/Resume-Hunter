@@ -34,12 +34,14 @@ export default async function LoginPage({
         <div style={{ display: "flex", gap: 8 }}>
           <button
             formAction={login}
+            className="rh-btn"
             style={{ flex: 1, padding: 10, borderRadius: 8, background: "#2563EB", color: "white", border: "none", cursor: "pointer" }}
           >
             Prijava
           </button>
           <button
             formAction={signup}
+            className="rh-btn"
             style={{ flex: 1, padding: 10, borderRadius: 8, background: "#e5e7eb", border: "none", cursor: "pointer" }}
           >
             Registracija

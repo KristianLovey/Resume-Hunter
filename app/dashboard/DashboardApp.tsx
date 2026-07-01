@@ -158,7 +158,7 @@ type ExperienceRow = { id: string; company: string; company_url: string; positio
 type EducationRow = { id: string; institution: string; title: string; period: string; link: string };
 
 /* ===================== Shared styles ===================== */
-const card: CSSProperties = { background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "26px 28px", boxShadow: "0 1px 2px rgba(16,31,68,.04)" };
+const card: CSSProperties = { background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "26px 28px", boxShadow: "0 2px 4px rgba(16,31,68,.04), 0 24px 48px -24px rgba(16,31,68,.32)" };
 const secIcon: CSSProperties = { width: 40, height: 40, borderRadius: 11, background: "#EAF1FE", color: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" };
 const label: CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "#5A6478", marginBottom: 7 };
 const labelSm: CSSProperties = { display: "block", fontSize: 12, fontWeight: 700, color: "#5A6478", marginBottom: 6 };
@@ -226,6 +226,134 @@ function Note({ ok, children }: { ok: boolean; children: React.ReactNode }) {
       {ok ? <ICheck size={13} color="#1FA463" w={3} /> : <IInfo size={13} color="#B7C1D2" />}
       {children}
     </p>
+  );
+}
+
+/* ===================== Period (mjesec/godina) picker ===================== */
+const MONTHS_HR = ["Siječanj", "Veljača", "Ožujak", "Travanj", "Svibanj", "Lipanj", "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"];
+const NOW_YEAR = new Date().getFullYear();
+const YEAR_OPTIONS = Array.from({ length: NOW_YEAR - 1969 }, (_, i) => String(NOW_YEAR - i));
+
+function parsePeriod(v: string) {
+  const res = { fromM: "", fromY: "", toM: "", toY: "", current: false };
+  if (!v) return res;
+  const parts = v.split(/\s*[-–—]\s*/);
+  const parseOne = (s: string) => {
+    const m = s.match(/(\d{1,2})[/.](\d{4})/);
+    return m ? { mo: String(parseInt(m[1], 10)), yr: m[2] } : null;
+  };
+  const a = parts[0] ? parseOne(parts[0]) : null;
+  if (a) {
+    res.fromM = a.mo;
+    res.fromY = a.yr;
+  }
+  const bRaw = parts[1] || "";
+  if (/present|danas|current|sada/i.test(bRaw)) res.current = true;
+  else {
+    const b = parseOne(bRaw);
+    if (b) {
+      res.toM = b.mo;
+      res.toY = b.yr;
+    }
+  }
+  return res;
+}
+
+function PeriodField({ name, defaultValue }: { name: string; defaultValue: string }) {
+  const parsed = parsePeriod(defaultValue);
+  const [value, setValue] = useState(defaultValue || "");
+  const [open, setOpen] = useState(false);
+  const [fromM, setFromM] = useState(parsed.fromM);
+  const [fromY, setFromY] = useState(parsed.fromY);
+  const [toM, setToM] = useState(parsed.toM);
+  const [toY, setToY] = useState(parsed.toY);
+  const [current, setCurrent] = useState(parsed.current);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  }, [open]);
+
+  function apply() {
+    const from = fromM && fromY ? `${fromM}/${fromY}` : "";
+    let result = "";
+    if (from) {
+      if (current) result = `${from} - present`;
+      else if (toM && toY) result = `${from} - ${toM}/${toY}`;
+      else result = from;
+    }
+    setValue(result);
+    setOpen(false);
+  }
+
+  const selStyle: CSSProperties = { ...fieldSm, padding: "9px 10px", cursor: "pointer" };
+  const grpLabel: CSSProperties = { fontSize: 11.5, fontWeight: 800, color: "#5A6478", letterSpacing: ".03em", marginBottom: 7 };
+  const monthOpts = MONTHS_HR.map((m, i) => (
+    <option key={m} value={i + 1}>
+      {i + 1} – {m}
+    </option>
+  ));
+  const yearOpts = YEAR_OPTIONS.map((y) => (
+    <option key={y} value={y}>
+      {y}
+    </option>
+  ));
+
+  return (
+    <div ref={wrapRef} style={{ position: "relative" }}>
+      <input type="hidden" name={name} value={value} readOnly />
+      <button type="button" onClick={() => setOpen((o) => !o)} className="rh-field" style={{ ...fieldSm, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+        <span style={{ color: value ? "#1B2A4E" : "#9AA6BA", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{value || "Odaberi razdoblje"}</span>
+        <IChevron size={14} color="#9AA6BA" />
+      </button>
+
+      {open && (
+        <div style={{ position: "absolute", zIndex: 40, top: "calc(100% + 6px)", left: 0, minWidth: 292, background: "#fff", border: "1px solid #E9EEF6", borderRadius: 14, boxShadow: "0 20px 44px rgba(16,31,68,.2)", padding: 16 }}>
+          <div style={grpLabel}>OD</div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+            <select value={fromM} onChange={(e) => setFromM(e.target.value)} style={selStyle}>
+              <option value="">Mjesec</option>
+              {monthOpts}
+            </select>
+            <select value={fromY} onChange={(e) => setFromY(e.target.value)} style={{ ...selStyle, maxWidth: 112 }}>
+              <option value="">Godina</option>
+              {yearOpts}
+            </select>
+          </div>
+
+          {!current && (
+            <>
+              <div style={grpLabel}>DO</div>
+              <div style={{ display: "flex", gap: 8, marginBottom: 14 }}>
+                <select value={toM} onChange={(e) => setToM(e.target.value)} style={selStyle}>
+                  <option value="">Mjesec</option>
+                  {monthOpts}
+                </select>
+                <select value={toY} onChange={(e) => setToY(e.target.value)} style={{ ...selStyle, maxWidth: 112 }}>
+                  <option value="">Godina</option>
+                  {yearOpts}
+                </select>
+              </div>
+            </>
+          )}
+
+          <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "#3A4A66", marginBottom: 16 }}>
+            <input type="checkbox" checked={current} onChange={(e) => setCurrent(e.target.checked)} style={{ width: 16, height: 16, accentColor: "#2563EB", cursor: "pointer" }} />
+            Trenutno radim ovdje (present)
+          </label>
+
+          <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+            <button type="button" onClick={() => setOpen(false)} style={{ padding: "9px 14px", borderRadius: 9, border: "1px solid #E1E8F2", background: "#fff", color: "#5A6478", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Odustani</button>
+            <button type="button" onClick={apply} style={{ padding: "9px 16px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Primijeni</button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -431,13 +559,15 @@ export default function DashboardApp({
     <div style={{ flex: "none", width: sidebarOpen ? 266 : 0, transition: "width .26s ease", position: "sticky", top: 0, height: "100vh", overflow: "hidden", zIndex: 5 }}>
       <aside style={{ width: 266, height: "100vh", background: "#fff", borderRight: "1px solid #E9EEF6", display: "flex", flexDirection: "column", padding: "22px 18px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "4px 2px 0" }}>
-          {logoOk ? (
-            <img src="/logo.png" alt="Resume Hunter" onError={() => setLogoOk(false)} style={{ width: 42, height: 42, flex: "none", objectFit: "contain", borderRadius: 11 }} />
-          ) : (
-            <div style={{ width: 42, height: 42, flex: "none", borderRadius: 11, background: "linear-gradient(135deg,#3B82F6,#1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ISearch size={22} color="#fff" />
-            </div>
-          )}
+          <a href="/" title="Povratak na naslovnicu" aria-label="Povratak na naslovnicu" style={{ display: "inline-flex", flex: "none", textDecoration: "none" }}>
+            {logoOk ? (
+              <img src="/logo.png" alt="Resume Hunter" onError={() => setLogoOk(false)} style={{ width: 42, height: 42, flex: "none", objectFit: "contain", borderRadius: 11 }} />
+            ) : (
+              <div style={{ width: 42, height: 42, flex: "none", borderRadius: 11, background: "linear-gradient(135deg,#3B82F6,#1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ISearch size={22} color="#fff" />
+              </div>
+            )}
+          </a>
           <div style={{ lineHeight: 1.05, flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-.01em" }}>
               <span style={{ color: "#0F1F44" }}>Resume</span> <span style={{ color: "#2563EB" }}>Hunter</span>
@@ -465,15 +595,23 @@ export default function DashboardApp({
         </button>
       </nav>
 
-      <div style={{ marginTop: 22, padding: 16, borderRadius: 16, background: "linear-gradient(150deg,#EEF4FF,#E3EDFF)", border: "1px solid #DCE7FB" }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: "#1D3B86" }}>
-          {completionPct === 100 ? "Profil je kompletan 🎉" : `Profil je ${completionPct}% spreman`}
+      <div style={{ marginTop: 22, padding: "15px 16px", borderRadius: 16, background: "#fff", border: "1px solid #E9EEF6", boxShadow: "0 1px 2px rgba(16,31,68,.04)" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 11 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+            {completionPct === 100 && (
+              <span style={{ width: 18, height: 18, flex: "none", borderRadius: "50%", background: "#E7F7EE", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ICheck size={11} color="#1FA463" w={3} />
+              </span>
+            )}
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: "#42506B", letterSpacing: "-.01em" }}>Dovršenost profila</span>
+          </div>
+          <span style={{ fontSize: 13.5, fontWeight: 800, color: completionPct === 100 ? "#1FA463" : "#2563EB" }}>{completionPct}%</span>
         </div>
-        <div style={{ height: 7, borderRadius: 6, background: "#fff", margin: "10px 0 9px", overflow: "hidden" }}>
-          <div style={{ height: "100%", width: `${completionPct}%`, borderRadius: 6, background: "linear-gradient(90deg,#3B82F6,#2563EB)", transition: "width .3s" }} />
+        <div style={{ height: 6, borderRadius: 6, background: "#EEF2F8", overflow: "hidden" }}>
+          <div style={{ height: "100%", width: `${completionPct}%`, borderRadius: 6, background: completionPct === 100 ? "linear-gradient(90deg,#22C55E,#1FA463)" : "linear-gradient(90deg,#3B82F6,#2563EB)", transition: "width .35s ease" }} />
         </div>
-        <div style={{ fontSize: 11.5, color: "#5E78A8", lineHeight: 1.4 }}>
-          {completionHint ? `${completionHint} za bolje rezultate.` : "Sve je popunjeno — spreman za Hunter!"}
+        <div style={{ fontSize: 11.5, color: "#8A94A6", lineHeight: 1.45, marginTop: 10 }}>
+          {completionHint ? `${completionHint} za bolje rezultate.` : "Profil je potpun — spreman za Hunter."}
         </div>
       </div>
 
@@ -570,7 +708,7 @@ export default function DashboardApp({
                   </div>
                   <div>
                     <label style={labelSm}>Razdoblje</label>
-                    <input className="rh-field" name="period" defaultValue={exp.period} placeholder="od – do" style={fieldSm} />
+                    <PeriodField name="period" defaultValue={exp.period} />
                   </div>
                 </div>
                 <div style={{ marginBottom: 14 }}>
@@ -1013,7 +1151,7 @@ export default function DashboardApp({
       {previewOpen && (
         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(15,31,68,.5)", backdropFilter: "blur(3px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px", overflowY: "auto" }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 760, background: "#fff", borderRadius: 20, boxShadow: "0 30px 70px rgba(16,31,68,.35)", animation: "rh-pop .3s ease both", marginBottom: 40 }}>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 22px", borderBottom: "1px solid #EEF2F8", position: "sticky", top: 0, background: "#fff", borderRadius: "20px 20px 0 0", zIndex: 1 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 22px", borderBottom: "1px solid #EEF2F8", background: "#fff", borderRadius: "20px 20px 0 0" }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: "#13234A", display: "flex", alignItems: "center", gap: 9 }}>
                 <IFile size={18} color="#2563EB" />
                 Pregled profila
