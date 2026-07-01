@@ -10,6 +10,11 @@ import {
   addEducation,
   updateEducation,
   deleteEducation,
+  addProject,
+  updateProject,
+  deleteProject,
+  deleteApplication,
+  updateApplicationStatus,
 } from "./actions";
 
 /* ===================== Icons ===================== */
@@ -38,6 +43,12 @@ const IBriefcase = ({ size = 20, color = "currentColor", w = 2 }: IconProps) => 
 );
 const ICap = ({ size = 20, color = "currentColor", w = 2 }: IconProps) => (
   <svg {...base(size, color, w)}><path d="M22 10 12 5 2 10l10 5 10-5z" /><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5" /></svg>
+);
+const IFolder = ({ size = 20, color = "currentColor", w = 2 }: IconProps) => (
+  <svg {...base(size, color, w)}><path d="M4 20a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2z" /></svg>
+);
+const IAward = ({ size = 20, color = "currentColor", w = 2 }: IconProps) => (
+  <svg {...base(size, color, w)}><circle cx="12" cy="8" r="6" /><path d="M8.5 13.5 7 22l5-3 5 3-1.5-8.5" /></svg>
 );
 const IStar = ({ size = 20, color = "currentColor", w = 2 }: IconProps) => (
   <svg {...base(size, color, w)}><path d="m12 2 2.4 7.4H22l-6 4.6 2.3 7.4L12 17l-6.3 4.4L8 14 2 9.4h7.6z" /></svg>
@@ -106,6 +117,20 @@ const TONES: Tone[] = [
   { name: "Kreativan", desc: "Maštovito i živo" },
   { name: "Formalan", desc: "Klasično i uljudno" },
 ];
+const TONE_TINT: Record<string, string> = {
+  Profesionalan: "#2563EB",
+  Samouvjeren: "#0EA5E9",
+  Prijateljski: "#7C3AED",
+  Kreativan: "#DB2777",
+  Formalan: "#0F766E",
+};
+const STATUS_LABELS: Record<string, string> = {
+  draft: "Skica",
+  applied: "Prijavljeno",
+  interview: "Razgovor",
+  offer: "Ponuda",
+  rejected: "Odbijeno",
+};
 const WORK = [
   "Analiziram tvoj profil i vještine",
   "Pregledavam oglas i web stranicu tvrtke",
@@ -149,13 +174,43 @@ type SkillCategory = { name: string; items: string[] };
 type ProfileData = {
   full_name: string;
   date_of_birth: string;
+  phone: string;
+  location: string;
   bio: string;
   default_tone: string;
   skills: { categories: SkillCategory[] };
   hobbies: string[];
+  certificates: string[];
+  strengths: string[];
 };
 type ExperienceRow = { id: string; company: string; company_url: string; position: string; period: string; description: string };
 type EducationRow = { id: string; institution: string; title: string; period: string; link: string };
+type ProjectRow = { id: string; name: string; description: string; period: string; links: string[] };
+type MatchCriterion = { label: string; score: number; weight: number };
+type HunterResult = {
+  coverLetter: string;
+  cvSuggestions: string[];
+  matchScore: number | null;
+  gaps: string[];
+  matchBreakdown?: MatchCriterion[];
+  parsedJob: { position?: string; company?: string; requiredSkills?: string[]; seniority?: string; companyTone?: string } | null;
+  applicationId: string | null;
+  saveError?: string | null;
+};
+type ApplicationRow = {
+  id: string;
+  company: string | null;
+  role_title: string | null;
+  tone: string | null;
+  match_score: number | null;
+  match_gaps: string[] | null;
+  match_breakdown: MatchCriterion[] | null;
+  cover_letter: string | null;
+  cv_suggestions: string[] | null;
+  parsed_job: { company?: string; position?: string } | null;
+  status: string | null;
+  created_at: string;
+};
 
 /* ===================== Shared styles ===================== */
 const card: CSSProperties = { background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "26px 28px", boxShadow: "0 2px 4px rgba(16,31,68,.04), 0 24px 48px -24px rgba(16,31,68,.32)" };
@@ -362,11 +417,15 @@ export default function DashboardApp({
   profile,
   experiences,
   education,
+  projects,
+  applications,
 }: {
   email: string;
   profile: ProfileData;
   experiences: ExperienceRow[];
   education: EducationRow[];
+  projects: ProjectRow[];
+  applications: ApplicationRow[];
 }) {
   const [screen, setScreen] = useState<Screen>("profile");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -376,10 +435,14 @@ export default function DashboardApp({
   // Profil — kontrolirana polja (init iz baze)
   const [fullName, setFullName] = useState(profile.full_name);
   const [dob, setDob] = useState(profile.date_of_birth);
+  const [phone, setPhone] = useState(profile.phone);
+  const [location, setLocation] = useState(profile.location);
   const [bio, setBio] = useState(profile.bio);
   const [selectedTone, setSelectedTone] = useState(profile.default_tone || "Profesionalan");
   const [skills, setSkills] = useState<SkillCategory[]>(profile.skills.categories);
   const [hobbies, setHobbies] = useState<string[]>(profile.hobbies);
+  const [certificates, setCertificates] = useState<string[]>(profile.certificates);
+  const [strengths, setStrengths] = useState<string[]>(profile.strengths);
   const [isSaving, startSave] = useTransition();
 
   // Hunter
@@ -387,6 +450,9 @@ export default function DashboardApp({
   const [hunterStep, setHunterStep] = useState<HunterStep>("input");
   const [workIdx, setWorkIdx] = useState(0);
   const [toast, setToast] = useState("");
+  const [jobText, setJobText] = useState("");
+  const [hunterResult, setHunterResult] = useState<HunterResult | null>(null);
+  const [dashFilter, setDashFilter] = useState<"all" | "week" | "interview">("all");
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const toastRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -398,13 +464,6 @@ export default function DashboardApp({
     },
     []
   );
-
-  useEffect(() => {
-    if (hunterStep === "working" && workIdx > WORK.length) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      setHunterStep("result");
-    }
-  }, [workIdx, hunterStep]);
 
   // Zatvori pregled na Escape
   useEffect(() => {
@@ -448,6 +507,7 @@ export default function DashboardApp({
   // Filtrirani podaci za CV pregled (preskoči prazne retke)
   const expList = experiences.filter((e) => (e.company || e.position || e.description || e.period || "").trim());
   const eduList = education.filter((e) => (e.institution || e.title || e.period || "").trim());
+  const projList = projects.filter((p) => (p.name || p.description || (p.links || []).join("")).trim());
   const skillCats = skills.filter((c) => c.items.length > 0);
   const dobFmt = dob ? `${dob.split("-").reverse().join(".")}.` : "";
   const headRole = experiences.find((e) => (e.position || "").trim())?.position || "";
@@ -468,10 +528,14 @@ export default function DashboardApp({
       const res = await saveProfile({
         full_name: fullName,
         date_of_birth: dob,
+        phone,
+        location,
         bio,
         default_tone: selectedTone,
         skills: { categories: skills },
         hobbies,
+        certificates,
+        strengths,
       });
       showToast(res?.ok ? "Profil spremljen" : res?.message || "Greška pri spremanju");
     });
@@ -500,35 +564,86 @@ export default function DashboardApp({
   function toggleHobby(v: string) {
     setHobbies((h) => (h.includes(v) ? h.filter((x) => x !== v) : [...h, v]));
   }
+  function addCertificate(v: string) {
+    setCertificates((c) => (c.includes(v) ? c : [...c, v]));
+  }
+  function removeCertificate(idx: number) {
+    setCertificates((c) => c.filter((_, j) => j !== idx));
+  }
+  function addStrength(v: string) {
+    setStrengths((s) => (s.includes(v) ? s : [...s, v]));
+  }
+  function removeStrength(idx: number) {
+    setStrengths((s) => s.filter((_, j) => j !== idx));
+  }
 
-  function generate() {
+  async function generate() {
+    const text = jobText.trim();
+    if (!text) {
+      showToast("Zalijepi tekst oglasa za posao.");
+      return;
+    }
+    setHunterResult(null);
     setHunterStep("working");
     setWorkIdx(0);
     if (intervalRef.current) clearInterval(intervalRef.current);
+    // koraci se vrte kao loader dok agent radi; zadnji korak "pulsira" do odgovora
     intervalRef.current = setInterval(() => {
-      setWorkIdx((prev) => prev + 1);
-    }, 850);
+      setWorkIdx((prev) => (prev < WORK.length - 1 ? prev + 1 : prev));
+    }, 900);
+    try {
+      const res = await fetch("/api/hunter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ jobText: text, tone: hunterTone }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (!res.ok) {
+        setHunterStep("input");
+        showToast(data?.error || "Greška pri generiranju.");
+        return;
+      }
+      setWorkIdx(WORK.length);
+      setHunterResult(data as HunterResult);
+      setHunterStep("result");
+    } catch {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      setHunterStep("input");
+      showToast("Agent trenutno nije dostupan.");
+    }
   }
 
-  function copyCv() {
-    try {
-      navigator.clipboard.writeText(`${displayName} – Frontend Developer`);
-    } catch {}
-    showToast("Životopis kopiran u međuspremnik");
-  }
   function copyCover() {
     try {
-      navigator.clipboard.writeText("Poštovani, ...");
+      navigator.clipboard.writeText(hunterResult?.coverLetter || "");
     } catch {}
     showToast("Motivacijsko pismo kopirano");
   }
-  function saveToDashboard() {
-    showToast("Spremljeno u Dashboard");
-    setTimeout(() => go("dashboard"), 700);
-  }
-  function newWithHunter() {
+  function resetHunter() {
     setHunterStep("input");
     setWorkIdx(0);
+    setHunterResult(null);
+  }
+  function newWithHunter() {
+    resetHunter();
+    go("hunter");
+  }
+  // Otvori spremljenu prijavu u Hunter "result" prikazu (reuse istog UI-ja)
+  function openApplication(app: ApplicationRow) {
+    const pj = app.parsed_job && typeof app.parsed_job === "object" ? app.parsed_job : {};
+    setHunterTone(app.tone || "Profesionalan");
+    setHunterResult({
+      coverLetter: app.cover_letter || "",
+      cvSuggestions: Array.isArray(app.cv_suggestions) ? app.cv_suggestions : [],
+      matchScore: app.match_score ?? null,
+      gaps: Array.isArray(app.match_gaps) ? app.match_gaps : [],
+      matchBreakdown: Array.isArray(app.match_breakdown) ? app.match_breakdown : [],
+      parsedJob: { ...pj, company: app.company || pj.company || "", position: app.role_title || pj.position || "" },
+      applicationId: app.id,
+      saveError: null,
+    });
+    setHunterStep("result");
     go("hunter");
   }
 
@@ -665,6 +780,14 @@ export default function DashboardApp({
               <label style={label}>Datum rođenja</label>
               <input className="rh-field" type="date" value={dob} onChange={(e) => setDob(e.target.value)} style={field} />
             </div>
+            <div>
+              <label style={label}>Telefon</label>
+              <input className="rh-field" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="npr. +385 99 123 4567" style={field} />
+            </div>
+            <div>
+              <label style={label}>Lokacija</label>
+              <input className="rh-field" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="npr. Zagreb, Hrvatska" style={field} />
+            </div>
           </div>
           <Note ok={!!fullName.trim() && !!dob}>Ime i datum rođenja su obavezni.</Note>
           <div style={{ marginTop: 16 }}>
@@ -775,6 +898,49 @@ export default function DashboardApp({
           </form>
         </section>
 
+        {/* Projekti */}
+        <section style={card}>
+          {sectionHead(<IFolder size={20} />, "Projekti", "Osobni ili poslovni projekti — s poveznicama")}
+          <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            {projects.length === 0 && (
+              <div style={{ fontSize: 13.5, color: "#8A94A6", padding: "4px 2px" }}>Još nema unesenih projekata.</div>
+            )}
+            {projects.map((p) => (
+              <form key={p.id} action={updateProject} style={{ border: "1px solid #E8EDF5", borderRadius: 16, padding: 18, background: "#FBFCFE", position: "relative" }}>
+                <input type="hidden" name="id" value={p.id} />
+                <button type="submit" formAction={deleteProject} className="rh-del" title="Ukloni" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid #E8EDF5", background: "#fff", color: "#A6B0C2", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <IX />
+                </button>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14, paddingRight: 34 }}>
+                  <div>
+                    <label style={labelSm}>Naziv projekta</label>
+                    <input className="rh-field" name="name" defaultValue={p.name} placeholder="npr. Resume Hunter" style={fieldSm} />
+                  </div>
+                  <div>
+                    <label style={labelSm}>Vrijeme izrade</label>
+                    <input className="rh-field" name="period" defaultValue={p.period} placeholder="npr. 2024 ili 3/2024 – 6/2024" style={fieldSm} />
+                  </div>
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelSm}>Opis</label>
+                  <textarea className="rh-field" name="description" rows={2} placeholder="Što projekt radi, tvoja uloga, tehnologije…" style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5 }} defaultValue={p.description} />
+                </div>
+                <div style={{ marginBottom: 14 }}>
+                  <label style={labelSm}>Poveznice <span style={{ color: "#9AA6BA", fontWeight: 500 }}>— jedna po retku</span></label>
+                  <textarea className="rh-field" name="links" rows={2} placeholder={"https://github.com/…\nhttps://demo.example.com"} style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5, color: "#2563EB" }} defaultValue={(p.links || []).join("\n")} />
+                </div>
+                <button type="submit" className="rh-soft" style={saveRowBtn}>Spremi</button>
+              </form>
+            ))}
+          </div>
+          <form action={addProject}>
+            <button type="submit" className="rh-add" style={addBtn}>
+              <IPlus />
+              Dodaj projekt
+            </button>
+          </form>
+        </section>
+
         {/* Vještine */}
         <section style={card}>
           {sectionHead(<IStar size={20} />, "Vještine", "Odaberi predložene ili dodaj svoje — po kategorijama")}
@@ -871,6 +1037,41 @@ export default function DashboardApp({
           </div>
         </section>
 
+        {/* Certifikati i snage */}
+        <section style={card}>
+          {sectionHead(<IAward size={20} />, "Certifikati i snage", "Certifikati te tvoje najjače strane")}
+          <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+            <div>
+              <div style={catTitle}>Certifikati</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
+                {certificates.map((c, i) => (
+                  <span key={`${c}-${i}`} style={chip}>
+                    {c}
+                    <button type="button" onClick={() => removeCertificate(i)} title="Ukloni" style={chipX}>
+                      <IX size={11} w={2.4} />
+                    </button>
+                  </span>
+                ))}
+                <ChipAdder placeholder="npr. Azure AI Fundamentals (Microsoft)" onAdd={addCertificate} />
+              </div>
+            </div>
+            <div>
+              <div style={catTitle}>Snage</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 9 }}>
+                {strengths.map((s, i) => (
+                  <span key={`${s}-${i}`} style={chip}>
+                    {s}
+                    <button type="button" onClick={() => removeStrength(i)} title="Ukloni" style={chipX}>
+                      <IX size={11} w={2.4} />
+                    </button>
+                  </span>
+                ))}
+                <ChipAdder placeholder="npr. Pažnja na detalje" onAdd={addStrength} />
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* Ton */}
         <section style={card}>
           {sectionHead(<IChat size={20} />, "Zadani ton", "Kako želiš zvučati u svojim prijavama")}
@@ -922,7 +1123,7 @@ export default function DashboardApp({
           <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "#7A879E" }}>Zalijepi oglas, odaberi ton — dobiješ prilagođeni životopis i pismo.</p>
         </div>
         {hunterStep === "result" && (
-          <button type="button" onClick={() => setHunterStep("input")} style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 16px", borderRadius: 11, border: "1px solid #DDE5F0", background: "#fff", color: "#42506B", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
+          <button type="button" onClick={resetHunter} style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 16px", borderRadius: 11, border: "1px solid #DDE5F0", background: "#fff", color: "#42506B", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
             <IRefresh />
             Nova prijava
           </button>
@@ -937,18 +1138,18 @@ export default function DashboardApp({
             </div>
             <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: "6px 18px 18px 18px", padding: "18px 20px", boxShadow: "0 1px 2px rgba(16,31,68,.04)" }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: "#2563EB", letterSpacing: ".03em", marginBottom: 6 }}>HUNTER AGENT</div>
-              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "#3A4A66" }}>Bok {displayName.split(" ")[0]} — spreman sam pronaći tvoju sljedeću priliku. Zalijepi poveznice na oglase ili tvrtke na koje se želiš prijaviti, a ja ću usporediti tvoj profil s onim što traže i napisati prilagođen životopis i motivacijsko pismo.</p>
+              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "#3A4A66" }}>Bok {displayName.split(" ")[0]} — spreman sam pronaći tvoju sljedeću priliku. Zalijepi tekst oglasa na koji se želiš prijaviti, a ja ću usporediti tvoj profil s onim što traže i napisati prilagođen životopis i motivacijsko pismo.</p>
             </div>
           </div>
 
           <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: 24, boxShadow: "0 2px 8px rgba(16,31,68,.05)" }}>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#3A4A66", marginBottom: 10 }}>Poveznice na oglase / tvrtke</label>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "#3A4A66", marginBottom: 10 }}>Oglas za posao</label>
             <div className="rh-fieldwrap" style={{ border: "1px solid #E1E8F2", borderRadius: 13, background: "#FBFCFE", padding: 6 }}>
-              <textarea rows={3} placeholder={"https://poslovi.infobip.com/frontend-developer\nhttps://careers.rimac-technology.com/…"} style={{ width: "100%", padding: "10px 12px", border: "none", outline: "none", font: "inherit", fontSize: 14, color: "#1B2A4E", background: "transparent", resize: "vertical", lineHeight: 1.7 }} />
+              <textarea value={jobText} onChange={(e) => setJobText(e.target.value)} rows={6} placeholder={"Zalijepi tekst oglasa, npr.:\n\nFrontend Developer (m/ž) — Infobip, Zagreb\nTražimo iskusnog frontend developera s React i TypeScript iskustvom…"} style={{ width: "100%", padding: "10px 12px", border: "none", outline: "none", font: "inherit", fontSize: 14, color: "#1B2A4E", background: "transparent", resize: "vertical", lineHeight: 1.7 }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 12.5, color: "#8A94A6" }}>
               <IInfo />
-              Možeš dodati više poveznica — svaka u svoj red.
+              Zalijepi cijeli opis posla za najbolji rezultat (ne samo poveznicu).
             </div>
 
             <div style={{ height: 1, background: "#EEF2F8", margin: "22px 0" }} />
@@ -1017,57 +1218,77 @@ export default function DashboardApp({
         </div>
       )}
 
-      {hunterStep === "result" && (
+      {hunterStep === "result" && hunterResult && (
         <div style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 44px 70px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, background: "linear-gradient(135deg,#EAF7EF,#E1F5EA)", border: "1px solid #C7EAD6", borderRadius: 14, padding: "14px 18px", marginBottom: 22 }}>
-            <div style={{ width: 34, height: 34, flex: "none", borderRadius: 10, background: "#1FA463", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          {/* status banner */}
+          <div style={{ display: "flex", alignItems: "center", gap: 12, background: hunterResult.saveError ? "linear-gradient(135deg,#FFF7EA,#FDEFD6)" : "linear-gradient(135deg,#EAF7EF,#E1F5EA)", border: hunterResult.saveError ? "1px solid #F3D9A6" : "1px solid #C7EAD6", borderRadius: 14, padding: "14px 18px", marginBottom: 22 }}>
+            <div style={{ width: 34, height: 34, flex: "none", borderRadius: 10, background: hunterResult.saveError ? "#E0A400" : "#1FA463", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center" }}>
               <ICheck size={18} w={2.5} />
             </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 14.5, fontWeight: 800, color: "#0E6B3D" }}>Spremno!</div>
-              <div style={{ fontSize: 12.5, color: "#3E9468" }}>Prilagođeno za <strong>Infobip · Frontend Developer</strong> · ton: {hunterTone}</div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: hunterResult.saveError ? "#8A5A00" : "#0E6B3D" }}>{hunterResult.saveError ? "Generirano (spremanje nije uspjelo)" : "Spremno i spremljeno u Dashboard!"}</div>
+              <div style={{ fontSize: 12.5, color: hunterResult.saveError ? "#9A6B18" : "#3E9468" }}>
+                Prilagođeno za <strong>{[hunterResult.parsedJob?.company, hunterResult.parsedJob?.position].filter(Boolean).join(" · ") || "posao"}</strong> · ton: {hunterTone}
+                {hunterResult.matchScore != null ? ` · ${hunterResult.matchScore}% podudaranje` : ""}
+              </div>
             </div>
-            <button type="button" onClick={saveToDashboard} style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "#1FA463", color: "#fff", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Spremi u Dashboard</button>
+            <button type="button" onClick={resetHunter} className="rh-soft" style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Nova prijava</button>
           </div>
 
+          {/* skill gaps */}
+          {hunterResult.gaps && hunterResult.gaps.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", flexWrap: "wrap", gap: 8, background: "#fff", border: "1px solid #E9EEF6", borderRadius: 14, padding: "13px 18px", marginBottom: 22 }}>
+              <span style={{ fontSize: 12.5, fontWeight: 700, color: "#8A5A00" }}>Traže, a nedostaje ti u profilu:</span>
+              {hunterResult.gaps.map((g, i) => (
+                <span key={`${g}-${i}`} style={{ padding: "4px 11px", borderRadius: 999, background: "#FDEFD6", color: "#8A5A00", fontSize: 12, fontWeight: 600 }}>{g}</span>
+              ))}
+            </div>
+          )}
+
+          {/* podudaranje po kriterijima */}
+          {hunterResult.matchBreakdown && hunterResult.matchBreakdown.length > 0 && (
+            <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 16, padding: "18px 20px", marginBottom: 22, boxShadow: "0 1px 2px rgba(16,31,68,.04)" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 800, color: "#13234A" }}>Podudaranje po kriterijima</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: (hunterResult.matchScore ?? 0) >= 70 ? "#1FA463" : (hunterResult.matchScore ?? 0) >= 40 ? "#2563EB" : "#E0A400" }}>{hunterResult.matchScore ?? 0}%</span>
+              </div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                {hunterResult.matchBreakdown.map((c) => (
+                  <div key={c.label}>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                      <span style={{ color: "#5A6478", fontWeight: 600 }}>{c.label} <span style={{ color: "#A0AABB" }}>· {c.weight}%</span></span>
+                      <span style={{ color: "#42506B", fontWeight: 700 }}>{c.score}%</span>
+                    </div>
+                    <div style={{ height: 6, borderRadius: 6, background: "#EEF2F8", overflow: "hidden" }}>
+                      <div style={{ height: "100%", width: `${c.score}%`, borderRadius: 6, background: c.score >= 70 ? "#1FA463" : c.score >= 40 ? "#2563EB" : "#E0A400" }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(380px,1fr))", gap: 22 }}>
-            {/* CV */}
+            {/* Životopis — live PDF pregled (skica) */}
             <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, boxShadow: "0 2px 10px rgba(16,31,68,.06)", overflow: "hidden" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #EEF2F8", background: "#FBFCFE" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ ...secIcon, width: 34, height: 34, borderRadius: 10 }}><IFile /></div>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "#13234A" }}>Životopis</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#13234A" }}>Životopis (PDF)</span>
                 </div>
-                <div style={{ display: "flex", gap: 7 }}>
-                  <button type="button" onClick={copyCv} title="Kopiraj" className="rh-icon" style={iconBtn}><ICopy /></button>
-                  <button type="button" onClick={() => showToast("Preuzimanje životopisa…")} title="Preuzmi" className="rh-icon" style={iconBtn}><IDownload /></button>
-                </div>
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori / Preuzmi PDF" className="rh-icon" style={iconBtn}><IDownload /></a>
               </div>
-              <div style={{ padding: "24px 26px", maxHeight: 560, overflow: "auto" }}>
-                <div style={{ fontSize: 21, fontWeight: 800, color: "#0F1F44" }}>{displayName}</div>
-                <div style={{ fontSize: 13.5, fontWeight: 700, color: "#2563EB", marginTop: 2 }}>{experiences[0]?.position || "Frontend Developer"}</div>
-                <div style={{ fontSize: 12, color: "#8A94A6", marginTop: 6 }}>{email} · +385 91 234 5678 · Zagreb, HR</div>
-                <div style={{ height: 1, background: "#EEF2F8", margin: "16px 0" }} />
-                <div style={{ fontSize: 11.5, fontWeight: 800, color: "#2563EB", letterSpacing: ".05em", marginBottom: 7 }}>SAŽETAK</div>
-                <p style={{ margin: "0 0 16px", fontSize: 13.5, lineHeight: 1.65, color: "#3A4A66" }}>{bio || "Frontend developer s iskustvom u izradi skalabilnih web aplikacija. Usmjeren na performanse, pristupačnost i čist kod."}</p>
-                <div style={{ fontSize: 11.5, fontWeight: 800, color: "#2563EB", letterSpacing: ".05em", marginBottom: 9 }}>ISKUSTVO</div>
-                {(experiences.length ? experiences : []).map((exp) => (
-                  <div key={exp.id} style={{ marginBottom: 13 }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 700, color: "#1B2A4E" }}>{exp.position || "Pozicija"}{exp.company ? ` · ${exp.company}` : ""}</span>
-                      <span style={{ fontSize: 12, color: "#8A94A6", whiteSpace: "nowrap" }}>{exp.period}</span>
-                    </div>
-                    {exp.description && <p style={{ margin: "5px 0 0", fontSize: 13, lineHeight: 1.6, color: "#566179" }}>{exp.description}</p>}
-                  </div>
-                ))}
-                {experiences.length === 0 && <p style={{ margin: "0 0 13px", fontSize: 13, color: "#8A94A6" }}>Dodaj iskustva u „Moj profil”.</p>}
-                <div style={{ fontSize: 11.5, fontWeight: 800, color: "#2563EB", letterSpacing: ".05em", margin: "4px 0 8px" }}>VJEŠTINE</div>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
-                  {skills.flatMap((c) => c.items).slice(0, 12).map((t, i) => (
-                    <span key={`${t}-${i}`} style={{ padding: "5px 11px", borderRadius: 999, background: "#EEF3FB", color: "#2C3E63", fontSize: 12, fontWeight: 600 }}>{t}</span>
-                  ))}
-                  {skills.flatMap((c) => c.items).length === 0 && <span style={{ fontSize: 12, color: "#8A94A6" }}>—</span>}
-                </div>
+              <div style={{ position: "relative", height: 520, overflow: "hidden", background: "#EEF2F8" }}>
+                <iframe
+                  title="Pregled životopisa"
+                  src={`/dashboard/cv?embed=1${hunterResult.applicationId ? `&app=${hunterResult.applicationId}` : ""}`}
+                  style={{ width: 1040, height: 1320, border: "none", transform: "scale(0.53)", transformOrigin: "top left", pointerEvents: "none", background: "#fff" }}
+                />
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 18, textDecoration: "none", background: "linear-gradient(transparent 68%, rgba(16,31,68,.10))" }}>
+                  <span className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 12, background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 14, fontWeight: 700, boxShadow: "0 10px 22px rgba(37,99,235,.35)" }}>
+                    <IEye size={16} /> Otvori CV (PDF)
+                  </span>
+                </a>
               </div>
             </div>
 
@@ -1078,19 +1299,9 @@ export default function DashboardApp({
                   <div style={{ ...secIcon, width: 34, height: 34, borderRadius: 10 }}><IMail /></div>
                   <span style={{ fontSize: 15, fontWeight: 800, color: "#13234A" }}>Motivacijsko pismo</span>
                 </div>
-                <div style={{ display: "flex", gap: 7 }}>
-                  <button type="button" onClick={copyCover} title="Kopiraj" className="rh-icon" style={iconBtn}><ICopy /></button>
-                  <button type="button" onClick={() => showToast("Preuzimanje pisma…")} title="Preuzmi" className="rh-icon" style={iconBtn}><IDownload /></button>
-                </div>
+                <button type="button" onClick={copyCover} title="Kopiraj" className="rh-icon" style={iconBtn}><ICopy /></button>
               </div>
-              <div style={{ padding: "24px 26px", maxHeight: 560, overflow: "auto", fontSize: 13.5, lineHeight: 1.75, color: "#3A4A66" }}>
-                <p style={{ margin: "0 0 13px" }}>Poštovani,</p>
-                <p style={{ margin: "0 0 13px" }}>s velikim entuzijazmom prijavljujem se na poziciju <strong>Frontend Developera</strong> u Infobipu. Vaš fokus na izgradnju pouzdane komunikacijske infrastrukture za milijune korisnika izravno se poklapa s mojim iskustvom u razvoju brzih i skalabilnih sučelja.</p>
-                <p style={{ margin: "0 0 13px" }}>U dosadašnjem radu vodio sam razvoj korisničkog sučelja platforme s globalnim dosegom, gdje sam smanjio vrijeme učitavanja za 38% i uveo komponentni sustav koji je ubrzao rad cijelog tima. Vjerujem da bih sličnu vrijednost mogao donijeti i vašem timu.</p>
-                <p style={{ margin: "0 0 13px" }}>Posebno me privlači Infobipova kultura inženjerske izvrsnosti i prilika za rad na proizvodu koji svakodnevno koristi velik broj ljudi. Radujem se mogućnosti da svoje znanje primijenim na vaše izazove.</p>
-                <p style={{ margin: "0 0 13px" }}>Hvala na razmatranju moje prijave. Stojim na raspolaganju za razgovor u terminu koji vam odgovara.</p>
-                <p style={{ margin: 0 }}>Srdačan pozdrav,<br /><strong>{displayName}</strong></p>
-              </div>
+              <div style={{ padding: "24px 26px", maxHeight: 560, overflow: "auto", fontSize: 13.5, lineHeight: 1.75, color: "#3A4A66", whiteSpace: "pre-wrap" }}>{hunterResult.coverLetter || "—"}</div>
             </div>
           </div>
         </div>
@@ -1099,6 +1310,26 @@ export default function DashboardApp({
   );
 
   /* ===================== Screen: Dashboard ===================== */
+  // Dashboard izračuni iz stvarnih prijava
+  const dashNow = Date.now();
+  const weekMs = 7 * 24 * 3600 * 1000;
+  const isThisWeek = (a: ApplicationRow) => dashNow - new Date(a.created_at).getTime() < weekMs;
+  const totalApps = applications.length;
+  const weekApps = applications.filter(isThisWeek).length;
+  const interviewApps = applications.filter((a) => a.status === "interview").length;
+  const respondedApps = applications.filter((a) => ["interview", "offer", "rejected"].includes(a.status || "")).length;
+  const responseRate = totalApps ? Math.round((respondedApps / totalApps) * 100) : 0;
+  const filteredApps = applications.filter((a) =>
+    dashFilter === "week" ? isThisWeek(a) : dashFilter === "interview" ? a.status === "interview" : true
+  );
+  const fmtDate = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleDateString("hr-HR", { day: "numeric", month: "short" });
+    } catch {
+      return "";
+    }
+  };
+
   const dashboardScreen = (
     <div>
       <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(244,247,252,.86)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E9EEF6", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -1113,19 +1344,98 @@ export default function DashboardApp({
       </header>
 
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "28px 44px 70px" }}>
-        <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "64px 40px", boxShadow: "0 1px 2px rgba(16,31,68,.04)", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
-          <div style={{ width: 66, height: 66, flex: "none", borderRadius: 18, background: "#EAF1FE", color: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-            <IGrid size={30} />
+        {totalApps === 0 ? (
+          <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "64px 40px", boxShadow: "0 1px 2px rgba(16,31,68,.04)", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center" }}>
+            <div style={{ width: 66, height: 66, flex: "none", borderRadius: 18, background: "#EAF1FE", color: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+              <IGrid size={30} />
+            </div>
+            <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#13234A" }}>Još nemaš spremljenih prijava</h2>
+            <p style={{ margin: "9px 0 24px", fontSize: 14, color: "#7A879E", maxWidth: 440, lineHeight: 1.6 }}>
+              Kad s Hunter Agentom generiraš životopis i motivacijsko pismo, pojavit će se ovdje — sa statistikama i pregledom svih prijava.
+            </p>
+            <button type="button" onClick={newWithHunter} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", font: "inherit", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 10px 22px rgba(37,99,235,.3)" }}>
+              <IPlus w={2.2} />
+              Generiraj prvu prijavu
+            </button>
           </div>
-          <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#13234A" }}>Još nemaš spremljenih prijava</h2>
-          <p style={{ margin: "9px 0 24px", fontSize: 14, color: "#7A879E", maxWidth: 440, lineHeight: 1.6 }}>
-            Kad s Hunter Agentom generiraš životopis i motivacijsko pismo te ih spremiš, pojavit će se ovdje — sa statistikama i pregledom svih prijava.
-          </p>
-          <button type="button" onClick={newWithHunter} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", font: "inherit", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 10px 22px rgba(37,99,235,.3)" }}>
-            <IPlus w={2.2} />
-            Generiraj prvu prijavu
-          </button>
-        </div>
+        ) : (
+          <>
+            {/* statistika */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 16, marginBottom: 24 }}>
+              {[
+                { l: "Ukupno prijava", v: String(totalApps), c: "#13234A" },
+                { l: "Ovaj tjedan", v: String(weekApps), c: "#13234A" },
+                { l: "Pozvan na razgovor", v: String(interviewApps), c: "#1FA463" },
+                { l: "Stopa odgovora", v: `${responseRate}%`, c: "#13234A" },
+              ].map((s) => (
+                <div key={s.l} style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 16, padding: "18px 20px", boxShadow: "0 1px 2px rgba(16,31,68,.04)" }}>
+                  <div style={{ fontSize: 12.5, fontWeight: 600, color: "#8A94A6" }}>{s.l}</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: s.c, marginTop: 4 }}>{s.v}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* filteri */}
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
+              {([["all", "Sve"], ["week", "Ovaj tjedan"], ["interview", "Razgovor"]] as const).map(([key, label]) => {
+                const active = dashFilter === key;
+                return (
+                  <button key={key} type="button" onClick={() => setDashFilter(key)} style={{ padding: "8px 15px", borderRadius: 999, border: active ? "none" : "1px solid #E1E8F2", background: active ? "linear-gradient(135deg,#3B82F6,#2563EB)" : "#fff", color: active ? "#fff" : "#5A6478", font: "inherit", fontSize: 13, fontWeight: active ? 700 : 600, cursor: "pointer" }}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* kartice */}
+            {filteredApps.length === 0 ? (
+              <div style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 16, padding: 40, textAlign: "center", fontSize: 14, color: "#8A94A6" }}>Nema prijava za ovaj filter.</div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 18 }}>
+                {filteredApps.map((app) => {
+                  const tint = TONE_TINT[app.tone || ""] || "#2563EB";
+                  const cardInitials = (app.company || app.role_title || "?").trim().slice(0, 2).toUpperCase();
+                  return (
+                    <div key={app.id} className="rh-card" style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 18, padding: 20, boxShadow: "0 1px 2px rgba(16,31,68,.04)", display: "flex", flexDirection: "column", transition: "all .15s" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                        <div style={{ width: 44, height: 44, flex: "none", borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: "#fff", background: tint }}>{cardInitials}</div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: "#13234A", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.company || "—"}</div>
+                          <div style={{ fontSize: 12.5, color: "#7A879E", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.role_title || "—"}</div>
+                        </div>
+                        {app.match_score != null && (
+                          <span style={{ padding: "4px 9px", flex: "none", borderRadius: 999, fontSize: 11.5, fontWeight: 800, background: "#E7F7EE", color: "#1FA463" }}>{app.match_score}%</span>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+                        {app.tone && <span style={{ padding: "4px 11px", borderRadius: 999, fontSize: 11.5, fontWeight: 700, background: tint + "18", color: tint }}>{app.tone}</span>}
+                        <span style={{ fontSize: 12, color: "#A0AABB" }}>{fmtDate(app.created_at)}</span>
+                        <form action={updateApplicationStatus} style={{ marginLeft: "auto" }}>
+                          <input type="hidden" name="id" value={app.id} />
+                          <select name="status" defaultValue={app.status || "draft"} onChange={(e) => e.currentTarget.form?.requestSubmit()} style={{ fontSize: 12, fontWeight: 700, color: "#3A4A66", padding: "5px 8px", borderRadius: 8, border: "1px solid #E1E8F2", background: "#fff", cursor: "pointer", fontFamily: "inherit" }}>
+                            {Object.entries(STATUS_LABELS).map(([v, l]) => (
+                              <option key={v} value={v}>{l}</option>
+                            ))}
+                          </select>
+                        </form>
+                      </div>
+                      <div style={{ display: "flex", gap: 7, marginTop: "auto", paddingTop: 14, borderTop: "1px solid #F0F3F8" }}>
+                        <button type="button" onClick={() => openApplication(app)} className="rh-soft" style={{ flex: 1, padding: 9, borderRadius: 9, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", font: "inherit", fontSize: 12.5, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+                          <IEye />
+                          Otvori
+                        </button>
+                        <form action={deleteApplication}>
+                          <input type="hidden" name="id" value={app.id} />
+                          <button type="submit" title="Obriši" className="rh-icon rh-del" style={{ ...iconBtn, width: 38 }}><IX size={15} /></button>
+                        </form>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </div>
     </div>
   );
@@ -1156,15 +1466,20 @@ export default function DashboardApp({
                 <IFile size={18} color="#2563EB" />
                 Pregled profila
               </div>
-              <button type="button" onClick={() => setPreviewOpen(false)} className="rh-icon" style={iconBtn} title="Zatvori (Esc)">
-                <IX />
-              </button>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <a href="/dashboard/cv" target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
+                  <IDownload size={15} /> Preuzmi PDF
+                </a>
+                <button type="button" onClick={() => setPreviewOpen(false)} className="rh-icon" style={iconBtn} title="Zatvori (Esc)">
+                  <IX />
+                </button>
+              </div>
             </div>
 
             <div style={{ padding: "32px 40px 42px" }}>
               <div style={{ fontSize: 26, fontWeight: 800, color: "#0F1F44" }}>{displayName}</div>
               {headRole && <div style={{ fontSize: 14.5, fontWeight: 700, color: "#2563EB", marginTop: 3 }}>{headRole}</div>}
-              <div style={{ fontSize: 12.5, color: "#8A94A6", marginTop: 7 }}>{[email, dobFmt].filter(Boolean).join(" · ")}</div>
+              <div style={{ fontSize: 12.5, color: "#8A94A6", marginTop: 7 }}>{[email, phone, location, dobFmt].filter(Boolean).join(" · ")}</div>
 
               {bio.trim() && (
                 <>
@@ -1202,6 +1517,28 @@ export default function DashboardApp({
                 </>
               )}
 
+              {projList.length > 0 && (
+                <>
+                  <div style={cvH}>PROJEKTI</div>
+                  {projList.map((p) => (
+                    <div key={p.id} style={{ marginBottom: 12 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "#1B2A4E" }}>{p.name || "—"}</span>
+                        {p.period && <span style={{ fontSize: 12, color: "#8A94A6", whiteSpace: "nowrap" }}>{p.period}</span>}
+                      </div>
+                      {p.description && <p style={{ margin: "5px 0 0", fontSize: 13, lineHeight: 1.6, color: "#566179" }}>{p.description}</p>}
+                      {(p.links || []).length > 0 && (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 6 }}>
+                          {p.links.map((l, i) => (
+                            <a key={`${l}-${i}`} href={l} target="_blank" rel="noreferrer" style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", textDecoration: "none", wordBreak: "break-all" }}>{l}</a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </>
+              )}
+
               {skillCats.length > 0 && (
                 <>
                   <div style={cvH}>VJEŠTINE</div>
@@ -1218,6 +1555,28 @@ export default function DashboardApp({
                 </>
               )}
 
+              {certificates.length > 0 && (
+                <>
+                  <div style={cvH}>CERTIFIKATI</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                    {certificates.map((c, i) => (
+                      <span key={`${c}-${i}`} style={cvChip}>{c}</span>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {strengths.length > 0 && (
+                <>
+                  <div style={cvH}>SNAGE</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
+                    {strengths.map((s, i) => (
+                      <span key={`${s}-${i}`} style={cvChip}>{s}</span>
+                    ))}
+                  </div>
+                </>
+              )}
+
               {hobbies.length > 0 && (
                 <>
                   <div style={cvH}>HOBIJI</div>
@@ -1229,7 +1588,7 @@ export default function DashboardApp({
                 </>
               )}
 
-              {!bio.trim() && expList.length === 0 && eduList.length === 0 && skillCats.length === 0 && hobbies.length === 0 && (
+              {!bio.trim() && expList.length === 0 && eduList.length === 0 && projList.length === 0 && skillCats.length === 0 && hobbies.length === 0 && certificates.length === 0 && strengths.length === 0 && (
                 <p style={{ margin: "22px 0 0", fontSize: 13.5, color: "#8A94A6" }}>Profil je još prazan — popuni podatke pa će se ovdje prikazati kao životopis.</p>
               )}
             </div>

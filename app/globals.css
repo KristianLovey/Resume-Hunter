@@ -164,6 +164,35 @@ html {
   color: #2563eb !important;
 }
 
+/* ===================== CV dokument (print → PDF) ===================== */
+.cv-doc {
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  color: #1b2a4e;
+}
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  html,
+  body {
+    background: #fff !important;
+  }
+  .cv-screen {
+    background: #fff !important;
+    padding: 0 !important;
+  }
+  .cv-doc {
+    box-shadow: none !important;
+    margin: 0 !important;
+    max-width: none !important;
+    padding: 0 !important;
+  }
+}
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
 /* nedostajao je rh-pop keyframe — bez njega sekcije nisu imale animaciju */
 @keyframes rh-pop {
   from {

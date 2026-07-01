@@ -32,9 +32,6 @@ const IGrid = ({ size = 24, color = "currentColor", w = 2 }: IconProps) => (
 const IArrow = ({ size = 18, color = "currentColor", w = 2.2 }: IconProps) => (
   <svg {...svg(size, color, w)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 );
-const ICheck = ({ size = 16, color = "currentColor", w = 2.5 }: IconProps) => (
-  <svg {...svg(size, color, w)}><path d="M20 6 9 17l-5-5" /></svg>
-);
 const ISpark = ({ size = 16, color = "currentColor", w = 2 }: IconProps) => (
   <svg {...svg(size, color, w)}><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z" /></svg>
 );
@@ -256,6 +253,9 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
                 </div>
               </div>
             </div>
+            <p style={{ margin: "24px auto 0", maxWidth: 560, textAlign: "center", fontSize: 15.5, lineHeight: 1.6, color: "#5E6B86", fontWeight: 500 }}>
+              This is exactly what you get: paste a job ad and Hunter hands back a resume and cover letter tailored to it — in seconds. No templates, no blank page. Just review and hit send.
+            </p>
           </Reveal>
         </div>
       </section>
@@ -271,12 +271,12 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             </div>
           </Reveal>
 
-          {/* stablo */}
-          <div style={{ position: "relative", maxWidth: 760, margin: "0 auto" }}>
-            <div style={{ position: "absolute", left: 27, top: 24, bottom: 24, width: 2, background: "linear-gradient(#C9DBF8,#EAF1FE)" }} />
-            {STEPS.map((s, i) => (
-              <Reveal key={s.title} delay={i * 60} y={36}>
-                <div style={{ display: "flex", gap: 22, alignItems: "flex-start", marginBottom: i === STEPS.length - 1 ? 0 : 26 }}>
+          {/* stablo — svi koraci se otkrivaju odjednom */}
+          <Reveal y={36}>
+            <div style={{ position: "relative", maxWidth: 760, margin: "0 auto" }}>
+              <div style={{ position: "absolute", left: 27, top: 24, bottom: 24, width: 2, background: "linear-gradient(#C9DBF8,#EAF1FE)" }} />
+              {STEPS.map((s, i) => (
+                <div key={s.title} style={{ display: "flex", gap: 22, alignItems: "flex-start", marginBottom: i === STEPS.length - 1 ? 0 : 26 }}>
                   <div style={{ position: "relative", zIndex: 1, flex: "none", width: 56, display: "flex", justifyContent: "center" }}>
                     <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#4C8DF7,#1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 5px #F4F7FC, inset 0 1px 0 rgba(255,255,255,.3), 0 8px 18px -4px rgba(37,99,235,.45)" }}>{s.icon}</div>
                   </div>
@@ -286,9 +286,9 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
                     <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: "#5E6B86" }}>{s.desc}</p>
                   </div>
                 </div>
-              </Reveal>
-            ))}
-          </div>
+              ))}
+            </div>
+          </Reveal>
         </div>
       </section>
 
@@ -303,9 +303,6 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             ].map((b, i) => (
               <Reveal key={b.t} delay={i * 80} y={30}>
                 <div style={{ height: "100%", background: "linear-gradient(180deg,#FFFFFF,#F7FAFF)", border: "1px solid #E7EDF7", borderRadius: 18, padding: "26px 24px", boxShadow: "0 1px 2px rgba(16,31,68,.04), 0 12px 26px -20px rgba(16,31,68,.16)" }}>
-                  <div style={{ width: 38, height: 38, borderRadius: 11, background: "#EAF1FE", color: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 14 }}>
-                    <ICheck size={20} color="#2563EB" />
-                  </div>
                   <h3 style={{ margin: "0 0 7px", fontSize: 17, fontWeight: 800, color: "#13234A" }}>{b.t}</h3>
                   <p style={{ margin: 0, fontSize: 14, lineHeight: 1.6, color: "#5E6B86" }}>{b.d}</p>
                 </div>

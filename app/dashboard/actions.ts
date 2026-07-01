@@ -9,10 +9,14 @@ type SupabaseServer = Awaited<ReturnType<typeof createClient>>;
 export type SaveProfileInput = {
   full_name: string;
   date_of_birth: string;
+  phone: string;
+  location: string;
   bio: string;
   default_tone: string;
   skills: { categories: { name: string; items: string[] }[] };
   hobbies: string[];
+  certificates: string[];
+  strengths: string[];
 };
 
 // Dohvati prijavljenog korisnika + klijent (RLS: sve ide kao taj korisnik).
@@ -42,10 +46,14 @@ export async function saveProfile(input: SaveProfileInput) {
       id: user.id,
       full_name: input.full_name.trim() || null,
       date_of_birth: input.date_of_birth || null,
+      phone: input.phone.trim() || null,
+      location: input.location.trim() || null,
       bio: input.bio.trim() || null,
       default_tone: input.default_tone || null,
       skills: input.skills,
       hobbies: input.hobbies,
+      certificates: input.certificates,
+      strengths: input.strengths,
       updated_at: new Date().toISOString(),
     },
     { onConflict: "id" }
@@ -151,5 +159,80 @@ export async function deleteEducation(formData: FormData) {
   if (!id) return;
 
   await supabase.from("education").delete().eq("id", id).eq("user_id", user.id);
+  revalidatePath("/dashboard");
+}
+
+/* ===================== Projekti ===================== */
+export async function addProject() {
+  const { supabase, user } = await authed();
+  await ensureProfile(supabase, user.id);
+
+  const { count } = await supabase
+    .from("projects")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
+  await supabase.from("projects").insert({
+    user_id: user.id,
+    name: "",
+    description: "",
+    period: "",
+    links: [],
+    sort_order: count ?? 0,
+  });
+  revalidatePath("/dashboard");
+}
+
+export async function updateProject(formData: FormData) {
+  const { supabase, user } = await authed();
+  const id = formData.get("id")?.toString();
+  if (!id) return;
+
+  // poveznice: textarea, jedna po retku -> jsonb array
+  const linksRaw = (formData.get("links") ?? "").toString();
+  const links = linksRaw
+    .split(/\r?\n/)
+    .map((l) => l.trim())
+    .filter(Boolean);
+
+  await supabase
+    .from("projects")
+    .update({
+      name: (formData.get("name") ?? "").toString(),
+      description: (formData.get("description") ?? "").toString(),
+      period: (formData.get("period") ?? "").toString(),
+      links,
+    })
+    .eq("id", id)
+    .eq("user_id", user.id);
+  revalidatePath("/dashboard");
+}
+
+export async function deleteProject(formData: FormData) {
+  const { supabase, user } = await authed();
+  const id = formData.get("id")?.toString();
+  if (!id) return;
+
+  await supabase.from("projects").delete().eq("id", id).eq("user_id", user.id);
+  revalidatePath("/dashboard");
+}
+
+/* ===================== Prijave (applications) ===================== */
+export async function deleteApplication(formData: FormData) {
+  const { supabase, user } = await authed();
+  const id = formData.get("id")?.toString();
+  if (!id) return;
+
+  await supabase.from("applications").delete().eq("id", id).eq("user_id", user.id);
+  revalidatePath("/dashboard");
+}
+
+export async function updateApplicationStatus(formData: FormData) {
+  const { supabase, user } = await authed();
+  const id = formData.get("id")?.toString();
+  const status = formData.get("status")?.toString();
+  if (!id || !status) return;
+
+  await supabase.from("applications").update({ status }).eq("id", id).eq("user_id", user.id);
   revalidatePath("/dashboard");
 }

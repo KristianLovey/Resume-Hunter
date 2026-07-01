@@ -24,8 +24,13 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
-  const [{ data: profile }, { data: experiences }, { data: education }] =
-    await Promise.all([
+  const [
+    { data: profile },
+    { data: experiences },
+    { data: education },
+    { data: projects },
+    { data: applications },
+  ] = await Promise.all([
       supabase.from("profiles").select("*").eq("id", user.id).maybeSingle(),
       supabase
         .from("experiences")
@@ -37,11 +42,25 @@ export default async function DashboardPage() {
         .select("*")
         .eq("user_id", user.id)
         .order("sort_order", { ascending: true }),
+      supabase
+        .from("projects")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("sort_order", { ascending: true }),
+      supabase
+        .from("applications")
+        .select(
+          "id,company,role_title,tone,match_score,match_gaps,match_breakdown,cover_letter,cv_suggestions,parsed_job,status,created_at"
+        )
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false }),
     ]);
 
   const profileData = {
     full_name: profile?.full_name ?? "",
     date_of_birth: profile?.date_of_birth ?? "",
+    phone: profile?.phone ?? "",
+    location: profile?.location ?? "",
     bio: profile?.bio ?? "",
     default_tone: profile?.default_tone ?? "Profesionalan",
     skills:
@@ -49,6 +68,8 @@ export default async function DashboardPage() {
         ? profile.skills
         : DEFAULT_SKILLS,
     hobbies: Array.isArray(profile?.hobbies) ? profile.hobbies : [],
+    certificates: Array.isArray(profile?.certificates) ? profile.certificates : [],
+    strengths: Array.isArray(profile?.strengths) ? profile.strengths : [],
   };
 
   return (
@@ -57,6 +78,8 @@ export default async function DashboardPage() {
       profile={profileData}
       experiences={experiences ?? []}
       education={education ?? []}
+      projects={projects ?? []}
+      applications={applications ?? []}
     />
   );
 }
