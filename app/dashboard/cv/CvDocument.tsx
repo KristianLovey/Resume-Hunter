@@ -154,12 +154,6 @@ export default function CvDocument({ data, embed = false }: { data: CvData; embe
 
           {/* desni stupac */}
           <div style={{ flex: 1, minWidth: 0 }}>
-            {data.tailored && (
-              <div style={{ marginBottom: 16, padding: "8px 12px", background: "#EAF1FE", borderRadius: 8, fontSize: 11, fontWeight: 700, color: "#2563EB" }}>
-                Prilagođeno za {[data.tailored.company, data.tailored.role].filter(Boolean).join(" · ") || "odabrani posao"}
-              </div>
-            )}
-
             {summary && (
               <>
                 <div style={heading}>Profil</div>

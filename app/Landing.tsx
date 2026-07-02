@@ -32,9 +32,6 @@ const IGrid = ({ size = 24, color = "currentColor", w = 2 }: IconProps) => (
 const IArrow = ({ size = 18, color = "currentColor", w = 2.2 }: IconProps) => (
   <svg {...svg(size, color, w)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>
 );
-const ISpark = ({ size = 16, color = "currentColor", w = 2 }: IconProps) => (
-  <svg {...svg(size, color, w)}><path d="m12 3 1.9 5.8a2 2 0 0 0 1.3 1.3L21 12l-5.8 1.9a2 2 0 0 0-1.3 1.3L12 21l-1.9-5.8a2 2 0 0 0-1.3-1.3L3 12l5.8-1.9a2 2 0 0 0 1.3-1.3z" /></svg>
-);
 const IMail = ({ size = 16, color = "currentColor", w = 2 }: IconProps) => (
   <svg {...svg(size, color, w)}><rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 6-10 7L2 6" /></svg>
 );
@@ -198,9 +195,6 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
                   <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FEBC2E" }} />
                   <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#28C840" }} />
                   <span style={{ marginLeft: 10, fontSize: 12.5, fontWeight: 700, color: "#9AA6BA" }}>Hunter Agent</span>
-                  <span style={{ marginLeft: "auto", display: "inline-flex", alignItems: "center", gap: 5, fontSize: 11, fontWeight: 800, color: "#1FA463", background: "#E7F7EE", padding: "4px 9px", borderRadius: 999 }}>
-                    <ISpark size={12} color="#1FA463" /> Generated
-                  </span>
                 </div>
 
                 <div style={{ padding: 18 }}>

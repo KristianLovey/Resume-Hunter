@@ -1278,16 +1278,18 @@ export default function DashboardApp({
                 </div>
                 <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori / Preuzmi PDF" className="rh-icon" style={iconBtn}><IDownload /></a>
               </div>
-              <div style={{ position: "relative", height: 520, overflow: "hidden", background: "#EEF2F8" }}>
+              <div style={{ position: "relative", height: 420, overflow: "hidden", background: "#fff", borderBottom: "1px solid #EEF2F8" }}>
                 <iframe
                   title="Pregled životopisa"
                   src={`/dashboard/cv?embed=1${hunterResult.applicationId ? `&app=${hunterResult.applicationId}` : ""}`}
-                  style={{ width: 1040, height: 1320, border: "none", transform: "scale(0.53)", transformOrigin: "top left", pointerEvents: "none", background: "#fff" }}
+                  style={{ width: 1080, height: 1320, border: "none", transform: "scale(0.53)", transformOrigin: "top left", pointerEvents: "none", background: "#fff" }}
                 />
-                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" style={{ position: "absolute", inset: 0, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 18, textDecoration: "none", background: "linear-gradient(transparent 68%, rgba(16,31,68,.10))" }}>
-                  <span className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 20px", borderRadius: 12, background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 14, fontWeight: 700, boxShadow: "0 10px 22px rgba(37,99,235,.35)" }}>
-                    <IEye size={16} /> Otvori CV (PDF)
-                  </span>
+                {/* klik bilo gdje po pregledu otvara puni CV */}
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori CV (PDF)" style={{ position: "absolute", inset: 0 }} />
+              </div>
+              <div style={{ display: "flex", justifyContent: "center", padding: "14px 20px", background: "#FBFCFE" }}>
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 12, background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>
+                  <IEye size={16} /> Otvori CV (PDF)
                 </a>
               </div>
             </div>
