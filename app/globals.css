@@ -66,6 +66,9 @@ body {
 .rh-landing {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.006em;
 }
 html {
   scroll-behavior: smooth;
@@ -94,16 +97,18 @@ html {
   box-sizing: border-box;
 }
 .rh-app ::-webkit-scrollbar {
-  width: 11px;
-  height: 11px;
+  width: 9px;
+  height: 9px;
 }
 .rh-app ::-webkit-scrollbar-thumb {
-  background: #d6e0ee;
+  background: #d3ddec;
   border-radius: 9px;
-  border: 3px solid #f4f7fc;
+  border: 3px solid transparent;
+  background-clip: content-box;
 }
 .rh-app ::-webkit-scrollbar-thumb:hover {
-  background: #c2d0e4;
+  background: #bfceE2;
+  background-clip: content-box;
 }
 .rh-app input::placeholder,
 .rh-app textarea::placeholder {
@@ -132,8 +137,9 @@ html {
   filter: brightness(1.05);
 }
 .rh-card:hover {
-  box-shadow: 0 10px 26px rgba(16, 31, 68, 0.1) !important;
-  border-color: #d8e2f1 !important;
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px -12px rgba(16, 31, 68, 0.18) !important;
+  border-color: #dce5f2 !important;
 }
 .rh-del:hover {
   color: #e0496a !important;
@@ -149,8 +155,8 @@ html {
 .rh-btn:hover,
 .rh-app button:not(:disabled):not(.rh-field):hover {
   transform: translateY(-2px);
-  filter: brightness(1.06);
-  box-shadow: 0 10px 22px -8px rgba(16, 31, 68, 0.3);
+  filter: brightness(1.04);
+  box-shadow: 0 8px 20px -8px rgba(16, 31, 68, 0.22);
 }
 .rh-btn:active,
 .rh-app button:not(:disabled):not(.rh-field):active {
@@ -197,7 +203,7 @@ html {
 @keyframes rh-pop {
   from {
     opacity: 0;
-    transform: translateY(22px) scale(0.98);
+    transform: translateY(15px) scale(0.992);
   }
   to {
     opacity: 1;

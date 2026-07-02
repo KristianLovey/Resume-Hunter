@@ -107,8 +107,8 @@ const STEPS: { icon: React.ReactNode; tag: string; title: string; desc: string }
 
 /* ===================== Styles ===================== */
 const wrap: CSSProperties = { maxWidth: 1120, margin: "0 auto", padding: "0 24px", width: "100%" };
-const btnPrimary: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 24px", borderRadius: 13, border: "none", background: "linear-gradient(135deg,#4C8DF7 0%,#2563EB 55%,#1D4ED8 100%)", color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "inset 0 1px 0 rgba(255,255,255,.28), 0 10px 22px -6px rgba(37,99,235,.5)" };
-const btnGhost: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 22px", borderRadius: 13, border: "1px solid #DBE3F1", background: "#fff", color: "#42506B", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "0 1px 2px rgba(16,31,68,.05)" };
+const btnPrimary: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 26px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#4C8DF7 0%,#2563EB 55%,#1D4ED8 100%)", color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "inset 0 1px 0 rgba(255,255,255,.22), 0 8px 20px -8px rgba(37,99,235,.42)" };
+const btnGhost: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 24px", borderRadius: 12, border: "1px solid #E4E9F2", background: "rgba(255,255,255,.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", color: "#42506B", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "0 1px 2px rgba(16,31,68,.04)" };
 
 export default function Landing({ loggedIn }: { loggedIn: boolean }) {
   const [logoOk, setLogoOk] = useState(true);
@@ -150,25 +150,25 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
       </header>
 
       {/* ===== Hero ===== */}
-      <section style={{ position: "relative", overflow: "hidden", background: "linear-gradient(180deg,#FFFFFF 0%,#F5F8FE 46%,#E8F0FC 100%)" }}>
+      <section style={{ position: "relative", overflow: "hidden", background: "linear-gradient(180deg,#FFFFFF 0%,#FAFBFD 52%,#F2F4F8 100%)" }}>
         {/* suptilna točkasta tekstura (blijedi prema rubovima) */}
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, #C9D8F0 1px, transparent 1.4px)", backgroundSize: "24px 24px", opacity: 0.5, WebkitMaskImage: "radial-gradient(120% 82% at 50% 0%, #000 40%, transparent 78%)", maskImage: "radial-gradient(120% 82% at 50% 0%, #000 40%, transparent 78%)", pointerEvents: "none" }} />
-        {/* dekorativni blobovi */}
-        <div style={{ position: "absolute", top: -140, right: -90, width: 440, height: 440, borderRadius: "50%", background: "radial-gradient(circle,#CFE0FB,transparent 68%)", animation: "rh-blob 9s ease-in-out infinite", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", bottom: -180, left: -130, width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle,#DDE9FF,transparent 68%)", animation: "rh-blob 11s ease-in-out infinite", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle, #D6DEEB 1px, transparent 1.4px)", backgroundSize: "26px 26px", opacity: 0.3, WebkitMaskImage: "radial-gradient(120% 82% at 50% 0%, #000 40%, transparent 78%)", maskImage: "radial-gradient(120% 82% at 50% 0%, #000 40%, transparent 78%)", pointerEvents: "none" }} />
+        {/* dekorativni blobovi (vrlo suptilni) */}
+        <div style={{ position: "absolute", top: -160, right: -110, width: 460, height: 460, borderRadius: "50%", background: "radial-gradient(circle,#E2ECFB,transparent 70%)", animation: "rh-blob 12s ease-in-out infinite", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", bottom: -200, left: -150, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle,#EAF0FC,transparent 70%)", animation: "rh-blob 14s ease-in-out infinite", pointerEvents: "none" }} />
         {/* oštar rub prema sljedećoj sekciji */}
-        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(16,31,68,.09),transparent)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(16,31,68,.06),transparent)", pointerEvents: "none" }} />
 
-        <div style={{ ...wrap, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "84px 24px 96px" }}>
+        <div style={{ ...wrap, position: "relative", display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", padding: "100px 24px 104px" }}>
           <Reveal delay={40} y={26}>
-            <h1 style={{ margin: 0, fontSize: "clamp(40px,7vw,68px)", lineHeight: 1.02, fontWeight: 800, letterSpacing: "-.03em", color: "#0F1F44", maxWidth: 920 }}>
+            <h1 style={{ margin: 0, fontSize: "clamp(44px,7.6vw,78px)", lineHeight: 1.03, fontWeight: 800, letterSpacing: "-.038em", color: "#0B1730", maxWidth: 960 }}>
               Apply for jobs smarter, not harder.{" "}
               <span style={{ background: "linear-gradient(135deg,#3B82F6,#2563EB)", WebkitBackgroundClip: "text", backgroundClip: "text", color: "transparent" }}>With Hunter, now you can!</span>
             </h1>
           </Reveal>
 
           <Reveal delay={140} y={26}>
-            <p style={{ margin: "24px auto 0", fontSize: "clamp(17px,2.2vw,20px)", lineHeight: 1.65, color: "#5E6B86", maxWidth: 630, fontWeight: 500 }}>
+            <p style={{ margin: "26px auto 0", fontSize: "clamp(17px,2.2vw,21px)", lineHeight: 1.6, color: "#5A6782", maxWidth: 640, fontWeight: 500, letterSpacing: "-.01em" }}>
               Fill out your profile once, paste a job link, and get a resume and cover letter tailored to that exact role. No more staring at a blank page.
             </p>
           </Reveal>
@@ -185,10 +185,10 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
 
           {/* product mock */}
           <Reveal delay={220} y={42}>
-            <div style={{ position: "relative", marginTop: 64, width: "min(720px,100%)", animation: "rh-float 6s ease-in-out infinite" }}>
-              {/* meki sjaj iza kartice */}
-              <div style={{ position: "absolute", inset: "-8% -5% -12%", background: "radial-gradient(58% 60% at 50% 42%, rgba(37,99,235,.22), transparent 72%)", filter: "blur(22px)", pointerEvents: "none" }} />
-              <div style={{ position: "relative", background: "#fff", border: "1px solid #E4EBF6", borderRadius: 22, boxShadow: "0 2px 4px rgba(16,31,68,.04), 0 24px 40px -20px rgba(37,99,235,.28), 0 50px 80px -34px rgba(16,31,68,.3)", overflow: "hidden", textAlign: "left" }}>
+            <div style={{ position: "relative", marginTop: 72, width: "min(720px,100%)", animation: "rh-float 6s ease-in-out infinite" }}>
+              {/* meki sjaj iza kartice (suptilan) */}
+              <div style={{ position: "absolute", inset: "-6% -4% -12%", background: "radial-gradient(56% 60% at 50% 44%, rgba(37,99,235,.12), transparent 72%)", filter: "blur(26px)", pointerEvents: "none" }} />
+              <div style={{ position: "relative", background: "#fff", border: "1px solid #E8EDF6", borderRadius: 24, boxShadow: "0 2px 6px rgba(16,31,68,.05), 0 32px 64px -30px rgba(16,31,68,.28)", overflow: "hidden", textAlign: "left" }}>
                 {/* browser chrome */}
                 <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "13px 16px", borderBottom: "1px solid #EEF2F8", background: "#FBFCFE" }}>
                   <span style={{ width: 11, height: 11, borderRadius: "50%", background: "#FF5F57" }} />
@@ -255,7 +255,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
       </section>
 
       {/* ===== Mogućnosti (scroll stablo) ===== */}
-      <section id="features" style={{ background: "#F4F7FC", padding: "84px 0 96px" }}>
+      <section id="features" style={{ background: "#F5F6F9", padding: "88px 0 100px" }}>
         <div style={wrap}>
           <Reveal y={24}>
             <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto 56px" }}>
@@ -272,7 +272,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
               {STEPS.map((s, i) => (
                 <div key={s.title} style={{ display: "flex", gap: 22, alignItems: "flex-start", marginBottom: i === STEPS.length - 1 ? 0 : 26 }}>
                   <div style={{ position: "relative", zIndex: 1, flex: "none", width: 56, display: "flex", justifyContent: "center" }}>
-                    <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#4C8DF7,#1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 5px #F4F7FC, inset 0 1px 0 rgba(255,255,255,.3), 0 8px 18px -4px rgba(37,99,235,.45)" }}>{s.icon}</div>
+                    <div style={{ width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#4C8DF7,#1D4ED8)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 0 0 5px #F5F6F9, inset 0 1px 0 rgba(255,255,255,.3), 0 8px 18px -6px rgba(37,99,235,.4)" }}>{s.icon}</div>
                   </div>
                   <div style={{ flex: 1, minWidth: 0, background: "#fff", border: "1px solid #E7EDF7", borderRadius: 18, padding: "20px 24px", boxShadow: "0 1px 2px rgba(16,31,68,.04), 0 16px 32px -20px rgba(16,31,68,.2)" }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: "#2563EB", letterSpacing: ".05em", textTransform: "uppercase" }}>Step {i + 1} · {s.tag}</div>

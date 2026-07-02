@@ -2,13 +2,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import CvDocument, { CvData } from "./CvDocument";
+import { getTemplate } from "./templates";
 
 export default async function CvPage({
   searchParams,
 }: {
-  searchParams: Promise<{ app?: string; embed?: string }>;
+  searchParams: Promise<{ app?: string; embed?: string; template?: string }>;
 }) {
-  const { app, embed } = await searchParams;
+  const { app, embed, template } = await searchParams;
   const supabase = await createClient();
   const {
     data: { user },
@@ -85,5 +86,8 @@ export default async function CvPage({
     tailored,
   };
 
-  return <CvDocument data={data} embed={embed === "1"} />;
+  // Predložak: ?template= ima prednost, inače spremljeni zadani iz profila
+  const theme = getTemplate(template || profile?.cv_template);
+
+  return <CvDocument data={data} theme={theme} embed={embed === "1"} appId={app} />;
 }

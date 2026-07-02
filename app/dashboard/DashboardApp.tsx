@@ -124,6 +124,15 @@ const TONE_TINT: Record<string, string> = {
   Kreativan: "#DB2777",
   Formalan: "#0F766E",
 };
+// Sigurna poveznica za render — dopusti samo http(s) (spriječi javascript:/data: XSS).
+function safeHref(raw: string): string {
+  const s = (raw || "").trim();
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/^(javascript|data|vbscript|file|blob):/i.test(s)) return "#";
+  if (/^[\w.-]+\.[a-z]{2,}(\/|$|\?|#)/i.test(s)) return `https://${s}`;
+  return "#";
+}
+
 const STATUS_LABELS: Record<string, string> = {
   draft: "Skica",
   applied: "Prijavljeno",
@@ -213,7 +222,7 @@ type ApplicationRow = {
 };
 
 /* ===================== Shared styles ===================== */
-const card: CSSProperties = { background: "#fff", border: "1px solid #E9EEF6", borderRadius: 20, padding: "26px 28px", boxShadow: "0 2px 4px rgba(16,31,68,.04), 0 24px 48px -24px rgba(16,31,68,.32)" };
+const card: CSSProperties = { background: "#fff", border: "1px solid #EAEEF5", borderRadius: 20, padding: "28px 30px", boxShadow: "0 1px 2px rgba(16,31,68,.03), 0 22px 44px -26px rgba(16,31,68,.22)" };
 const secIcon: CSSProperties = { width: 40, height: 40, borderRadius: 11, background: "#EAF1FE", color: "#2563EB", display: "flex", alignItems: "center", justifyContent: "center", flex: "none" };
 const label: CSSProperties = { display: "block", fontSize: 12.5, fontWeight: 700, color: "#5A6478", marginBottom: 7 };
 const labelSm: CSSProperties = { display: "block", fontSize: 12, fontWeight: 700, color: "#5A6478", marginBottom: 6 };
@@ -662,17 +671,17 @@ export default function DashboardApp({
       fontFamily: "inherit",
       fontSize: 14.5,
       fontWeight: active ? 700 : 600,
-      color: active ? "#fff" : "#5A6478",
-      background: active ? "linear-gradient(135deg,#3B82F6,#2563EB)" : "transparent",
-      boxShadow: active ? "0 8px 18px rgba(37,99,235,.30)" : "none",
-      transition: "all .15s",
+      color: active ? "#2563EB" : "#5A6478",
+      background: active ? "#EAF1FE" : "transparent",
+      boxShadow: "none",
+      transition: "background .18s ease, color .18s ease",
     };
   };
 
   /* ===================== Sidebar ===================== */
   const sidebar = (
     <div style={{ flex: "none", width: sidebarOpen ? 266 : 0, transition: "width .26s ease", position: "sticky", top: 0, height: "100vh", overflow: "hidden", zIndex: 5 }}>
-      <aside style={{ width: 266, height: "100vh", background: "#fff", borderRight: "1px solid #E9EEF6", display: "flex", flexDirection: "column", padding: "22px 18px" }}>
+      <aside style={{ width: 266, height: "100vh", background: "#fff", borderRight: "1px solid rgba(16,31,68,.06)", display: "flex", flexDirection: "column", padding: "22px 18px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "4px 2px 0" }}>
           <a href="/" title="Povratak na naslovnicu" aria-label="Povratak na naslovnicu" style={{ display: "inline-flex", flex: "none", textDecoration: "none" }}>
             {logoOk ? (
@@ -702,7 +711,7 @@ export default function DashboardApp({
         <button onClick={() => go("hunter")} style={navStyle("hunter")}>
           <ISearch />
           <span>Hunter Agent</span>
-          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 800, letterSpacing: ".04em", padding: "2px 7px", borderRadius: 6, background: screen === "hunter" ? "rgba(255,255,255,.22)" : "#EAF1FE", color: screen === "hunter" ? "#fff" : "#2563EB" }}>AI</span>
+          <span style={{ marginLeft: "auto", fontSize: 10, fontWeight: 800, letterSpacing: ".04em", padding: "2px 7px", borderRadius: 6, background: screen === "hunter" ? "#2563EB" : "#DCE8FE", color: screen === "hunter" ? "#fff" : "#2563EB" }}>AI</span>
         </button>
         <button onClick={() => go("dashboard")} style={navStyle("dashboard")}>
           <IGrid />
@@ -749,7 +758,7 @@ export default function DashboardApp({
   /* ===================== Screen: Profile ===================== */
   const profileScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(244,247,252,.86)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E9EEF6", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(16,31,68,.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#0F1F44", letterSpacing: "-.01em" }}>Moj profil</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "#7A879E" }}>Izgradi svoj profil jednom — Hunter ga koristi za svaku prijavu.</p>
@@ -1115,7 +1124,7 @@ export default function DashboardApp({
   /* ===================== Screen: Hunter ===================== */
   const hunterScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(244,247,252,.86)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E9EEF6", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(16,31,68,.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#0F1F44", letterSpacing: "-.01em", display: "flex", alignItems: "center", gap: 10 }}>
             Hunter Agent <span style={{ fontSize: 10.5, fontWeight: 800, color: "#2563EB", background: "#EAF1FE", padding: "3px 8px", borderRadius: 6, letterSpacing: ".04em" }}>AI</span>
@@ -1282,6 +1291,7 @@ export default function DashboardApp({
                 <iframe
                   title="Pregled životopisa"
                   src={`/dashboard/cv?embed=1${hunterResult.applicationId ? `&app=${hunterResult.applicationId}` : ""}`}
+                  sandbox="allow-same-origin allow-scripts"
                   style={{ width: 1080, height: 1320, border: "none", transform: "scale(0.53)", transformOrigin: "top left", pointerEvents: "none", background: "#fff" }}
                 />
                 {/* klik bilo gdje po pregledu otvara puni CV */}
@@ -1334,7 +1344,7 @@ export default function DashboardApp({
 
   const dashboardScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(244,247,252,.86)", backdropFilter: "blur(8px)", borderBottom: "1px solid #E9EEF6", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(16,31,68,.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#0F1F44", letterSpacing: "-.01em" }}>Dashboard</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "#7A879E" }}>Svi tvoji generirani životopisi i motivacijska pisma.</p>
@@ -1398,7 +1408,7 @@ export default function DashboardApp({
                   const tint = TONE_TINT[app.tone || ""] || "#2563EB";
                   const cardInitials = (app.company || app.role_title || "?").trim().slice(0, 2).toUpperCase();
                   return (
-                    <div key={app.id} className="rh-card" style={{ background: "#fff", border: "1px solid #E9EEF6", borderRadius: 18, padding: 20, boxShadow: "0 1px 2px rgba(16,31,68,.04)", display: "flex", flexDirection: "column", transition: "all .15s" }}>
+                    <div key={app.id} className="rh-card" style={{ background: "#fff", border: "1px solid #EAEEF5", borderRadius: 20, padding: 20, boxShadow: "0 1px 2px rgba(16,31,68,.04)", display: "flex", flexDirection: "column", transition: "transform .18s ease, box-shadow .18s ease, border-color .18s ease" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                         <div style={{ width: 44, height: 44, flex: "none", borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: "#fff", background: tint }}>{cardInitials}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -1443,7 +1453,7 @@ export default function DashboardApp({
   );
 
   return (
-    <div className="rh-app" style={{ display: "flex", minHeight: "100vh", width: "100%", background: "#F4F7FC", color: "#1B2A4E" }}>
+    <div className="rh-app" style={{ display: "flex", minHeight: "100vh", width: "100%", background: "#F5F6F9", color: "#1B2A4E" }}>
       {sidebar}
       <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" }}>
         <div key={screen} className="rh-enter" style={{ display: "flex", flexDirection: "column", flex: 1 }}>
@@ -1532,7 +1542,7 @@ export default function DashboardApp({
                       {(p.links || []).length > 0 && (
                         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 6 }}>
                           {p.links.map((l, i) => (
-                            <a key={`${l}-${i}`} href={l} target="_blank" rel="noreferrer" style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", textDecoration: "none", wordBreak: "break-all" }}>{l}</a>
+                            <a key={`${l}-${i}`} href={safeHref(l)} target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, fontWeight: 700, color: "#2563EB", textDecoration: "none", wordBreak: "break-all" }}>{l}</a>
                           ))}
                         </div>
                       )}

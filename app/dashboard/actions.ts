@@ -19,6 +19,20 @@ export type SaveProfileInput = {
   strengths: string[];
 };
 
+// Dopusti samo http(s) poveznice — spriječi javascript:/data:/file: itd. (XSS preko href-a).
+function sanitizeUrl(raw: string): string | null {
+  const s = raw.trim();
+  if (!s) return null;
+  if (/^https?:\/\//i.test(s)) return s;
+  if (/^(javascript|data|vbscript|file|blob):/i.test(s)) return null;
+  // bez sheme, ali izgleda kao domena → pretpostavi https
+  if (/^[\w.-]+\.[a-z]{2,}(\/|$|\?|#)/i.test(s)) return `https://${s}`;
+  return null;
+}
+
+const ALLOWED_STATUS = ["draft", "applied", "interview", "offer", "rejected"];
+const ALLOWED_TEMPLATES = ["modern", "classic", "minimal", "elegant", "compact", "creative"];
+
 // Dohvati prijavljenog korisnika + klijent (RLS: sve ide kao taj korisnik).
 async function authed() {
   const supabase = await createClient();
@@ -146,7 +160,7 @@ export async function updateEducation(formData: FormData) {
       institution: (formData.get("institution") ?? "").toString(),
       title: (formData.get("title") ?? "").toString(),
       period: (formData.get("period") ?? "").toString(),
-      link: (formData.get("link") ?? "").toString(),
+      link: sanitizeUrl((formData.get("link") ?? "").toString()) ?? "",
     })
     .eq("id", id)
     .eq("user_id", user.id);
@@ -192,8 +206,8 @@ export async function updateProject(formData: FormData) {
   const linksRaw = (formData.get("links") ?? "").toString();
   const links = linksRaw
     .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean);
+    .map((l) => sanitizeUrl(l))
+    .filter((l): l is string => !!l);
 
   await supabase
     .from("projects")
@@ -227,11 +241,20 @@ export async function deleteApplication(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
+export async function setCvTemplate(formData: FormData) {
+  const { supabase, user } = await authed();
+  const t = formData.get("template")?.toString();
+  if (!t || !ALLOWED_TEMPLATES.includes(t)) return;
+  await supabase.from("profiles").update({ cv_template: t }).eq("id", user.id);
+  revalidatePath("/dashboard/cv");
+}
+
 export async function updateApplicationStatus(formData: FormData) {
   const { supabase, user } = await authed();
   const id = formData.get("id")?.toString();
   const status = formData.get("status")?.toString();
-  if (!id || !status) return;
+  // whitelist statusa — spriječi upis proizvoljne vrijednosti
+  if (!id || !status || !ALLOWED_STATUS.includes(status)) return;
 
   await supabase.from("applications").update({ status }).eq("id", id).eq("user_id", user.id);
   revalidatePath("/dashboard");
