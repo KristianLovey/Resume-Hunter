@@ -1,0 +1,26 @@
+{
+  "projectName": "Resume Hunter",
+  "description": "AI-powered job application assistant — generates tailored resumes and cover letters",
+  "model": "claude-opus-4-8",
+  "defaultSkills": [
+    "resume-hunter-ai",
+    "resume-hunter-db",
+    "resume-hunter-code",
+    "resume-hunter-security",
+    "resume-hunter-roadmap",
+    "ai-agents",
+    "code-quality",
+    "db-design",
+    "security-checklist"
+  ],
+  "permissions": {
+    "bash": true,
+    "powershell": true,
+    "edit": true,
+    "read": true
+  },
+  "linting": {
+    "eslint": true,
+    "typescript": true
+  }
+}
