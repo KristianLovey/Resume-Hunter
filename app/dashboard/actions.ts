@@ -259,3 +259,96 @@ export async function updateApplicationStatus(formData: FormData) {
   await supabase.from("applications").update({ status }).eq("id", id).eq("user_id", user.id);
   revalidatePath("/dashboard");
 }
+
+/* ===================== CV Editiranje ===================== */
+
+type EditableCvData = {
+  summary: string;
+  experiences: { title: string; bullets: string[] }[];
+};
+
+export async function saveCvEdits(applicationId: string, data: EditableCvData) {
+  const { supabase, user } = await authed();
+
+  // Validiraj podatke — nisu prazni?
+  if (!data.summary?.trim()) {
+    return { success: false, error: "Profil ne smije biti prazan" };
+  }
+
+  // Spremi edited CV u tailored_cv_edited kolonu
+  const { error } = await supabase
+    .from("applications")
+    .update({
+      tailored_cv_edited: data,
+      edited_at: new Date().toISOString(),
+    })
+    .eq("id", applicationId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  revalidatePath("/dashboard/cv");
+  return { success: true };
+}
+
+export async function regenerateCv(
+  applicationId: string,
+  userEdits?: EditableCvData
+): Promise<{ success: boolean; error?: string; data?: EditableCvData }> {
+  const { supabase, user } = await authed();
+
+  // Dohvati aplikaciju
+  const { data: app, error: appError } = await supabase
+    .from("applications")
+    .select("job_description,tone,cover_letter")
+    .eq("id", applicationId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (appError || !app) {
+    return { success: false, error: "Aplikacija nije pronađena" };
+  }
+
+  // Regeneriraj kroz AI API
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/hunter/regenerate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        applicationId,
+        jobText: app.job_description,
+        tone: app.tone,
+        userEdits,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return { success: false, error: errorData.error || "Greška pri regeneraciji" };
+    }
+
+    const result = await response.json();
+
+    // Update DB s novim CV-om
+    if (result.tailoredCv) {
+      await supabase
+        .from("applications")
+        .update({
+          tailored_cv: result.tailoredCv,
+          tailored_cv_edited: null, // Resetiraj edite nakon regeneracije
+          regenerated_at: new Date().toISOString(),
+        })
+        .eq("id", applicationId)
+        .eq("user_id", user.id);
+
+      revalidatePath("/dashboard/cv");
+      return { success: true, data: result.tailoredCv };
+    }
+
+    return { success: false, error: "Nema rezultata regeneracije" };
+  } catch (e) {
+    return { success: false, error: e instanceof Error ? e.message : "Greška pri regeneraciji" };
+  }
+}

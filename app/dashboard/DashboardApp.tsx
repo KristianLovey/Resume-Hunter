@@ -1297,9 +1297,12 @@ export default function DashboardApp({
                 {/* klik bilo gdje po pregledu otvara puni CV */}
                 <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori CV (PDF)" style={{ position: "absolute", inset: 0 }} />
               </div>
-              <div style={{ display: "flex", justifyContent: "center", padding: "14px 20px", background: "#FBFCFE" }}>
-                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "11px 22px", borderRadius: 12, background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 14, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>
-                  <IEye size={16} /> Otvori CV (PDF)
+              <div style={{ display: "flex", justifyContent: "center", gap: 10, padding: "14px 20px", background: "#FBFCFE" }}>
+                <a href={hunterResult.applicationId ? `/dashboard/cv/edit?app=${hunterResult.applicationId}` : "#"} className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 11, border: "1px solid #DDE5F0", background: "#fff", color: "#2563EB", fontSize: 13.5, fontWeight: 700, textDecoration: "none", cursor: hunterResult.applicationId ? "pointer" : "not-allowed", opacity: hunterResult.applicationId ? 1 : 0.5 }}>
+                  ✏️ Uredi
+                </a>
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 11, background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontSize: 13.5, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>
+                  <IEye size={16} /> Preuzmi PDF
                 </a>
               </div>
             </div>
