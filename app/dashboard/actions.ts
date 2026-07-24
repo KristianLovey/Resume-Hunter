@@ -3,6 +3,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
 
 type SupabaseServer = Awaited<ReturnType<typeof createClient>>;
 
@@ -302,7 +303,7 @@ export async function regenerateCv(
   // Dohvati aplikaciju
   const { data: app, error: appError } = await supabase
     .from("applications")
-    .select("job_description,tone,cover_letter")
+    .select("job_description,tone,parsed_job")
     .eq("id", applicationId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -311,44 +312,105 @@ export async function regenerateCv(
     return { success: false, error: "Aplikacija nije pronađena" };
   }
 
-  // Regeneriraj kroz AI API
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || ""}/api/hunter/regenerate`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        applicationId,
-        jobText: app.job_description,
-        tone: app.tone,
-        userEdits,
+    // Koristi Google AI SDK direktno
+    const { google } = await import("@ai-sdk/google");
+    const { generateText, tool } = await import("ai");
+
+    const MODEL = "gemini-2.5-flash";
+
+    const REGENERATE_PROMPT = `You are Hunter, an expert career writer who improves already-written resumes.
+
+## TASK
+The candidate has edited their resume. Your job is to:
+1. Keep their edits as primary content
+2. Refine and enhance (better phrasing, stronger verbs, better metrics)
+3. Maintain truthfulness
+4. Re-apply tailoring to the job posting
+
+## CV BULLET RULES
+- Start with strong action verbs
+- Quantify impact where possible
+- Results first
+- One idea per bullet
+- NO personal pronouns
+- NO clichés`;
+
+    // State objekt koji će alati popuniti
+    const state = {
+      refinedSummary: "",
+      refinedExperiences: [] as { title: string; bullets: string[] }[],
+    };
+
+    const tools = {
+      refineCV: tool({
+        description: "Refine the candidate's edited CV",
+        inputSchema: z.object({
+          refinedSummary: z.string().describe("Refined 2-3 sentence summary"),
+          refinedExperiences: z
+            .array(
+              z.object({
+                title: z.string().describe("Position · Company"),
+                bullets: z.array(z.string()).describe("Refined achievement bullets"),
+              })
+            )
+            .describe("Refined experiences"),
+        }),
+        execute: async (input) => {
+          state.refinedSummary = input.refinedSummary;
+          state.refinedExperiences = input.refinedExperiences;
+          return { ok: true };
+        },
       }),
+    };
+
+    // Pokreni AI
+    await generateText({
+      model: google(MODEL),
+      system: REGENERATE_PROMPT,
+      tools,
+      prompt: `Candidate's edited CV and job posting. Refine their edits using the refineCV tool.
+
+## Edited CV
+Summary: ${userEdits?.summary || "N/A"}
+
+Experiences:
+${userEdits?.experiences
+  ?.map(
+    (e, i) =>
+      `${i + 1}. ${e.title}
+   ${e.bullets.map((b) => `- ${b}`).join("\n   ")}`
+  )
+  .join("\n\n") || "N/A"}
+
+## Job Posting
+${app.job_description}`,
     });
 
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      return { success: false, error: errorData.error || "Greška pri regeneraciji" };
+    if (!state.refinedSummary) {
+      return { success: false, error: "Nije moguće procesirati regeneraciju" };
     }
 
-    const result = await response.json();
+    const regeneratedCV = {
+      summary: state.refinedSummary,
+      experiences: state.refinedExperiences,
+    };
 
-    // Update DB s novim CV-om
-    if (result.tailoredCv) {
-      await supabase
-        .from("applications")
-        .update({
-          tailored_cv: result.tailoredCv,
-          tailored_cv_edited: null, // Resetiraj edite nakon regeneracije
-          regenerated_at: new Date().toISOString(),
-        })
-        .eq("id", applicationId)
-        .eq("user_id", user.id);
+    // Update DB
+    await supabase
+      .from("applications")
+      .update({
+        tailored_cv: regeneratedCV,
+        tailored_cv_edited: null,
+        regenerated_at: new Date().toISOString(),
+      })
+      .eq("id", applicationId)
+      .eq("user_id", user.id);
 
-      revalidatePath("/dashboard/cv");
-      return { success: true, data: result.tailoredCv };
-    }
-
-    return { success: false, error: "Nema rezultata regeneracije" };
+    revalidatePath("/dashboard/cv");
+    return { success: true, data: regeneratedCV };
   } catch (e) {
+    console.error("Regenerate error:", e);
     return { success: false, error: e instanceof Error ? e.message : "Greška pri regeneraciji" };
   }
 }

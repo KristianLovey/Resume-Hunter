@@ -185,7 +185,7 @@ export default function CvEditor({
               opacity: isSaving ? 0.6 : 1,
             }}
           >
-            {isSaving ? "Sprema..." : "Spremi"}
+            {isSaving ? "Saving..." : "Save"}
           </button>
           <button
             onClick={() => {
@@ -203,7 +203,7 @@ export default function CvEditor({
               cursor: "pointer",
             }}
           >
-            Otkaži
+            Cancel
           </button>
         </div>
       );
@@ -253,7 +253,7 @@ export default function CvEditor({
           }}
         >
           <div>
-            📝 Pronašli smo nespremljene izmjene od prije. Želite li ih vratiti?
+            📝 We found unsaved changes. Would you like to restore them?
           </div>
           <div style={{ display: "flex", gap: 8 }}>
             <button
@@ -269,7 +269,7 @@ export default function CvEditor({
                 cursor: "pointer",
               }}
             >
-              Vrati
+              Restore
             </button>
             <button
               onClick={handleDiscardRestore}
@@ -284,7 +284,7 @@ export default function CvEditor({
                 cursor: "pointer",
               }}
             >
-              Odbij
+              Discard
             </button>
           </div>
         </div>
@@ -319,14 +319,14 @@ export default function CvEditor({
             fontWeight: 500,
           }}
         >
-          💾 Promjene se čuvaju automatski u memoriji preglednika
+          💾 Changes auto-saved to your browser
         </div>
       )}
 
       {/* Summary */}
       <div style={{ marginBottom: 24 }}>
         <h3 style={{ fontSize: 13, fontWeight: 800, color: "#2563EB", textTransform: "uppercase", marginBottom: 10 }}>
-          Profil
+          Professional Summary
         </h3>
         <EditableField
           value={data.summary}
@@ -341,7 +341,7 @@ export default function CvEditor({
         <div key={expIdx} style={{ marginBottom: 20, paddingLeft: 12, borderLeft: "2px solid #E5E7EB" }}>
           <div style={{ marginBottom: 10 }}>
             <div style={{ fontSize: 11.5, fontWeight: 800, color: "#8A94A6", textTransform: "uppercase", marginBottom: 6 }}>
-              Pozicija
+              Position
             </div>
             <EditableField
               value={exp.title}
@@ -357,7 +357,7 @@ export default function CvEditor({
           {/* Bullets */}
           <div>
             <div style={{ fontSize: 11.5, fontWeight: 800, color: "#8A94A6", textTransform: "uppercase", marginBottom: 8 }}>
-              Postignuća
+              Achievements
             </div>
             {exp.bullets.map((bullet, bulletIdx) => (
               <div key={bulletIdx} style={{ marginBottom: 8, display: "flex", gap: 8 }}>
@@ -396,10 +396,10 @@ export default function CvEditor({
               opacity: isRegenerating ? 0.6 : 1,
             }}
           >
-            {isRegenerating ? "Regenerira se..." : "🔄 Regeneriraj CV"}
+            {isRegenerating ? "Regenerating..." : "🔄 Regenerate CV"}
           </button>
           <div style={{ fontSize: 12, color: "#8A94A6", display: "flex", alignItems: "center" }}>
-            Klikni na bilo koji dio da ga edituiraš
+            Click any section to edit
           </div>
         </div>
       )}

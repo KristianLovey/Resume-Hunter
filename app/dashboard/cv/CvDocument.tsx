@@ -94,7 +94,7 @@ export default function CvDocument({
   // ---------- glavne sekcije (desni stupac / one-column tijelo) ----------
   const Summary = summaryText ? (
     <div style={{ marginBottom: secGap }}>
-      {heading("Profil")}
+      {heading("Professional Summary")}
       <p style={{ margin: 0, fontSize: bodyFs, lineHeight: 1.6, color: "#3A4A66" }}>{summaryText}</p>
     </div>
   ) : null;
@@ -102,7 +102,7 @@ export default function CvDocument({
   const Experience =
     useTailoredExp || data.experiences.length > 0 ? (
       <div style={{ marginBottom: secGap }}>
-        {heading("Radno iskustvo")}
+        {heading("Work Experience")}
         {useTailoredExp
           ? tailoredExps.map((e, i) => (
               <div key={i} style={{ marginBottom: 12 }}>
@@ -125,7 +125,7 @@ export default function CvDocument({
   const Projects =
     data.projects.length > 0 ? (
       <div style={{ marginBottom: secGap }}>
-        {heading("Projekti")}
+        {heading("Projects")}
         {data.projects.map((p, i) => (
           <div key={i} style={{ marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -142,7 +142,7 @@ export default function CvDocument({
   const Education =
     data.education.length > 0 ? (
       <div style={{ marginBottom: secGap }}>
-        {heading("Obrazovanje")}
+        {heading("Education")}
         {data.education.map((e, i) => (
           <div key={i} style={{ marginBottom: 9 }}>
             <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -158,7 +158,7 @@ export default function CvDocument({
   const skillsBlock = (onDark: boolean) =>
     data.skills.length > 0 ? (
       <div style={{ marginBottom: secGap }}>
-        {heading("Vještine", onDark)}
+        {heading("Skills", onDark)}
         {data.skills.map((c) => (
           <div key={c.name} style={{ marginBottom: 8 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: onDark ? "#9DBEFF" : accent, marginBottom: 2 }}>{c.name}</div>
@@ -178,7 +178,7 @@ export default function CvDocument({
 
   const contactBlock = (onDark: boolean) => (
     <div style={{ marginBottom: secGap }}>
-      {heading("Kontakt", onDark)}
+      {heading("Contact", onDark)}
       <div style={{ fontSize: 11.5, lineHeight: 1.55, color: onDark ? sideText : "#42506B", wordBreak: "break-word" }}>
         {data.location && <div>{data.location}</div>}
         {data.phone && <div style={{ marginTop: 3 }}>{data.phone}</div>}
@@ -192,10 +192,10 @@ export default function CvDocument({
     <>
       {contactBlock(onDark)}
       {skillsBlock(onDark)}
-      {listBlock("Certifikati", data.certificates, onDark, " · ")}
-      {listBlock("Jezici", data.languages, onDark)}
-      {listBlock("Snage", data.strengths, onDark, " · ")}
-      {listBlock("Interesi", data.interests, onDark, " • ")}
+      {listBlock("Certificates", data.certificates, onDark, " · ")}
+      {listBlock("Languages", data.languages, onDark)}
+      {listBlock("Strengths", data.strengths, onDark, " · ")}
+      {listBlock("Interests", data.interests, onDark, " • ")}
     </>
   );
 
@@ -225,9 +225,9 @@ export default function CvDocument({
     <div className="cv-screen" style={{ minHeight: "100vh", background: embed ? "#fff" : "#EEF2F8", padding: embed ? 0 : "24px 16px" }}>
       {!embed && (
         <div className="no-print" style={{ maxWidth: 900, margin: "0 auto 16px", display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
-          <a href="/dashboard" style={{ fontSize: 13.5, fontWeight: 700, color: "#42506B", textDecoration: "none" }}>← Natrag</a>
+          <a href="/dashboard" style={{ fontSize: 13.5, fontWeight: 700, color: "#42506B", textDecoration: "none" }}>← Back</a>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#8A94A6" }}>Predložak:</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#8A94A6" }}>Template:</span>
             {CV_TEMPLATES.map((t) => (
               <a key={t.id} href={`?template=${t.id}${appId ? `&app=${appId}` : ""}`} style={pill(t.id === theme.id)}>
                 {t.name}
@@ -238,9 +238,9 @@ export default function CvDocument({
             <form action={setCvTemplate}>
               <input type="hidden" name="template" value={theme.id} />
               {appId && <input type="hidden" name="app" value={appId} />}
-              <button type="submit" style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #DDE5F0", background: "#fff", color: "#42506B", fontFamily: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Spremi kao zadani</button>
+              <button type="submit" style={{ padding: "10px 14px", borderRadius: 10, border: "1px solid #DDE5F0", background: "#fff", color: "#42506B", fontFamily: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Set as default</button>
             </form>
-            <button type="button" onClick={() => window.print()} style={{ padding: "10px 18px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontFamily: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>Preuzmi PDF</button>
+            <button type="button" onClick={() => window.print()} style={{ padding: "10px 18px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,#3B82F6,#2563EB)", color: "#fff", fontFamily: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>Download PDF</button>
           </div>
         </div>
       )}
@@ -268,10 +268,10 @@ export default function CvDocument({
             {Projects}
             {Education}
             {skillsBlock(false)}
-            {listBlock("Certifikati", data.certificates, false, " · ")}
-            {listBlock("Jezici", data.languages, false)}
-            {listBlock("Snage", data.strengths, false, " · ")}
-            {listBlock("Interesi", data.interests, false, " • ")}
+            {listBlock("Certificates", data.certificates, false, " · ")}
+            {listBlock("Languages", data.languages, false)}
+            {listBlock("Strengths", data.strengths, false, " · ")}
+            {listBlock("Interests", data.interests, false, " • ")}
           </div>
         )}
       </div>

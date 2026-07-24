@@ -53,10 +53,10 @@ export default async function CvEditPage({
               display: "inline-block",
             }}
           >
-            ← Natrag
+            ← Back
           </a>
           <h1 style={{ fontSize: 32, fontWeight: 800, color: "#0F1F44", margin: "12px 0 8px" }}>
-            Uredi CV
+            Edit Resume
           </h1>
           <p style={{ fontSize: 15, color: "#5E6B86", margin: 0 }}>
             {application.role_title} · {application.company}
@@ -89,12 +89,12 @@ export default async function CvEditPage({
             lineHeight: 1.6,
           }}
         >
-          <div style={{ fontWeight: 700, marginBottom: 8 }}>💡 Savjet:</div>
+          <div style={{ fontWeight: 700, marginBottom: 8 }}>💡 Tips:</div>
           <ul style={{ margin: 0, paddingLeft: 20 }}>
-            <li>Klikni na bilo koji dio da ga edituiraš</li>
-            <li>Nespremljene promjene se čuvaju u memoriji preglednika (2 sata)</li>
-            <li>"Regeneriraj CV" će poboljšati vaše edite sa AI sugestijama</li>
-            <li>Promjene se sprema na serveru tek kad klikneš "Spremi"</li>
+            <li>Click any section to edit</li>
+            <li>Unsaved changes are saved in your browser (2 hours)</li>
+            <li>"Regenerate CV" will enhance your edits with AI suggestions</li>
+            <li>Changes are only saved to server when you click "Save"</li>
           </ul>
         </div>
       </div>

@@ -2,6 +2,8 @@
 
 import { CSSProperties, useEffect, useRef, useState, useTransition } from "react";
 import { logout } from "@/app/auth/actions";
+import { getMatchingCities, isMajorCity } from "@/lib/locationData";
+import DatePicker from "@/app/components/DatePicker";
 import {
   saveProfile,
   addExperience,
@@ -446,6 +448,8 @@ export default function DashboardApp({
   const [dob, setDob] = useState(profile.date_of_birth);
   const [phone, setPhone] = useState(profile.phone);
   const [location, setLocation] = useState(profile.location);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [filteredCities, setFilteredCities] = useState<typeof import("@/lib/locationData").MAJOR_CITIES>([]);
   const [bio, setBio] = useState(profile.bio);
   const [selectedTone, setSelectedTone] = useState(profile.default_tone || "Profesionalan");
   const [skills, setSkills] = useState<SkillCategory[]>(profile.skills.categories);
@@ -546,7 +550,7 @@ export default function DashboardApp({
         certificates,
         strengths,
       });
-      showToast(res?.ok ? "Profil spremljen" : res?.message || "Greška pri spremanju");
+      showToast(res?.ok ? "Profile saved" : res?.message || "Greška pri spremanju");
     });
   }
 
@@ -778,38 +782,98 @@ export default function DashboardApp({
           {sectionHead(<IUser size={20} />, "Osobni podaci", "Osnovne informacije o tebi")}
           <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 20 }}>
             <div style={{ width: 72, height: 72, flex: "none", borderRadius: "50%", background: "linear-gradient(135deg,#3B82F6,#1D4ED8)", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24 }}>{initials}</div>
-            <button type="button" style={{ padding: "9px 15px", borderRadius: 10, border: "1px dashed #B9C6DC", background: "#F7FAFF", color: "#3D6CC8", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Učitaj fotografiju</button>
+            <button type="button" style={{ padding: "9px 15px", borderRadius: 10, border: "1px dashed #B9C6DC", background: "#F7FAFF", color: "#3D6CC8", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Upload photo</button>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16 }}>
             <div>
-              <label style={label}>Ime i prezime</label>
+              <label style={label}>Full name</label>
               <input className="rh-field" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="npr. Marko Horvat" style={field} />
             </div>
             <div>
-              <label style={label}>Datum rođenja</label>
-              <input className="rh-field" type="date" value={dob} onChange={(e) => setDob(e.target.value)} style={field} />
+              <label style={label}>Date of birth</label>
+              <DatePicker value={dob} onChange={setDob} placeholder="Select your date of birth" />
             </div>
             <div>
-              <label style={label}>Telefon</label>
-              <input className="rh-field" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="npr. +385 99 123 4567" style={field} />
+              <label style={label}>Phone</label>
+              <input className="rh-field" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="e.g. +1 234 567 8900" style={field} />
             </div>
-            <div>
-              <label style={label}>Lokacija</label>
-              <input className="rh-field" value={location} onChange={(e) => setLocation(e.target.value)} placeholder="npr. Zagreb, Hrvatska" style={field} />
+            <div style={{ position: "relative" }}>
+              <label style={label}>Location</label>
+              <input
+                className="rh-field"
+                value={location}
+                onChange={(e) => {
+                  setLocation(e.target.value);
+                  if (e.target.value.length > 1) {
+                    setFilteredCities(getMatchingCities(e.target.value));
+                    setShowLocationDropdown(true);
+                  } else {
+                    setShowLocationDropdown(false);
+                  }
+                }}
+                onFocus={() => location.length > 1 && setShowLocationDropdown(true)}
+                onBlur={() => setTimeout(() => setShowLocationDropdown(false), 200)}
+                placeholder="e.g. New York, USA"
+                style={field}
+              />
+              {showLocationDropdown && filteredCities.length > 0 && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    right: 0,
+                    background: "#fff",
+                    border: "1px solid #E5E7EB",
+                    borderRadius: 8,
+                    maxHeight: 200,
+                    overflowY: "auto",
+                    zIndex: 10,
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    marginTop: 4,
+                  }}
+                >
+                  {filteredCities.map((city) => (
+                    <div
+                      key={city.name}
+                      onClick={() => {
+                        setLocation(city.name);
+                        setShowLocationDropdown(false);
+                      }}
+                      style={{
+                        padding: "10px 14px",
+                        cursor: "pointer",
+                        borderBottom: "1px solid #F0F0F0",
+                        fontSize: 14,
+                        color: "#3A4A66",
+                      }}
+                      onMouseEnter={(e) => (e.currentTarget.style.background = "#F9FAFB")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                    >
+                      {city.name}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {location && !isMajorCity(location) && location.length > 3 && (
+                <div style={{ fontSize: 12, color: "#8A94A6", marginTop: 6 }}>
+                  ℹ️ If you select a smaller city, we'll help you match better with more companies!
+                </div>
+              )}
             </div>
           </div>
-          <Note ok={!!fullName.trim() && !!dob}>Ime i datum rođenja su obavezni.</Note>
+          <Note ok={!!fullName.trim() && !!dob}>Full name and date of birth are required.</Note>
           <div style={{ marginTop: 16 }}>
             <label style={label}>
-              Kratki opis <span style={{ color: "#9AA6BA", fontWeight: 500 }}>— tvoje najbolje osobine i snage</span>
+              About you <span style={{ color: "#9AA6BA", fontWeight: 500 }}>— your best qualities and strengths</span>
             </label>
-            <textarea className="rh-field" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Pouzdan i znatiželjan… ukratko o sebi" style={{ ...field, resize: "vertical", lineHeight: 1.55 }} />
+            <textarea className="rh-field" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Reliable and curious… briefly about yourself" style={{ ...field, resize: "vertical", lineHeight: 1.55 }} />
           </div>
         </section>
 
-        {/* Radno iskustvo */}
+        {/* Work experience */}
         <section style={card}>
-          {sectionHead(<IBriefcase size={20} />, "Radno iskustvo", "Dodaj svoje pozicije i projekte")}
+          {sectionHead(<IBriefcase size={20} />, "Work experience", "Add your positions and achievements")}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {experiences.length === 0 && (
               <div style={{ fontSize: 13.5, color: "#8A94A6", padding: "4px 2px" }}>Još nema unesenih iskustava.</div>
@@ -861,7 +925,7 @@ export default function DashboardApp({
 
         {/* Obrazovanje */}
         <section style={card}>
-          {sectionHead(<ICap size={20} />, "Obrazovanje i tečajevi", "Diplome, tečajevi i certifikati")}
+          {sectionHead(<ICap size={20} />, "Education & Courses", "Degrees, courses and certifications")}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {education.length === 0 && (
               <div style={{ fontSize: 13.5, color: "#8A94A6", padding: "4px 2px" }}>Još nema unesenog obrazovanja.</div>
@@ -907,9 +971,9 @@ export default function DashboardApp({
           </form>
         </section>
 
-        {/* Projekti */}
+        {/* Projects */}
         <section style={card}>
-          {sectionHead(<IFolder size={20} />, "Projekti", "Osobni ili poslovni projekti — s poveznicama")}
+          {sectionHead(<IFolder size={20} />, "Projects", "Personal or professional projects — with links")}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {projects.length === 0 && (
               <div style={{ fontSize: 13.5, color: "#8A94A6", padding: "4px 2px" }}>Još nema unesenih projekata.</div>
@@ -950,9 +1014,9 @@ export default function DashboardApp({
           </form>
         </section>
 
-        {/* Vještine */}
+        {/* Skills */}
         <section style={card}>
-          {sectionHead(<IStar size={20} />, "Vještine", "Odaberi predložene ili dodaj svoje — po kategorijama")}
+          {sectionHead(<IStar size={20} />, "Skills", "Select suggested or add your own — organized by category")}
           <div style={{ marginBottom: 14 }}>
             <Note ok={skills.some((c) => c.items.length > 0)}>Dodaj barem jednu kategoriju s barem jednom vještinom.</Note>
           </div>
@@ -1046,9 +1110,9 @@ export default function DashboardApp({
           </div>
         </section>
 
-        {/* Certifikati i snage */}
+        {/* Certificates & Strengths */}
         <section style={card}>
-          {sectionHead(<IAward size={20} />, "Certifikati i snage", "Certifikati te tvoje najjače strane")}
+          {sectionHead(<IAward size={20} />, "Certificates & Strengths", "Your certifications and greatest strengths")}
           <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
             <div>
               <div style={catTitle}>Certifikati</div>
@@ -1235,7 +1299,7 @@ export default function DashboardApp({
               <ICheck size={18} w={2.5} />
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14.5, fontWeight: 800, color: hunterResult.saveError ? "#8A5A00" : "#0E6B3D" }}>{hunterResult.saveError ? "Generirano (spremanje nije uspjelo)" : "Spremno i spremljeno u Dashboard!"}</div>
+              <div style={{ fontSize: 14.5, fontWeight: 800, color: hunterResult.saveError ? "#8A5A00" : "#0E6B3D" }}>{hunterResult.saveError ? "Generated (save failed)" : "Ready and saved to Dashboard!"}</div>
               <div style={{ fontSize: 12.5, color: hunterResult.saveError ? "#9A6B18" : "#3E9468" }}>
                 Prilagođeno za <strong>{[hunterResult.parsedJob?.company, hunterResult.parsedJob?.position].filter(Boolean).join(" · ") || "posao"}</strong> · ton: {hunterTone}
                 {hunterResult.matchScore != null ? ` · ${hunterResult.matchScore}% podudaranje` : ""}
@@ -1283,7 +1347,7 @@ export default function DashboardApp({
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid #EEF2F8", background: "#FBFCFE" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ ...secIcon, width: 34, height: 34, borderRadius: 10 }}><IFile /></div>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "#13234A" }}>Životopis (PDF)</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "#13234A" }}>Resume (PDF)</span>
                 </div>
                 <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori / Preuzmi PDF" className="rh-icon" style={iconBtn}><IDownload /></a>
               </div>
