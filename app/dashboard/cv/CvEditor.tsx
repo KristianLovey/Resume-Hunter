@@ -109,7 +109,7 @@ export default function CvEditor({
       const result = await regenerateCv(applicationId, data);
       if (!result.success) {
         setError(result.error || "Neuspješna regeneracija");
-      } else {
+      } else if (result.data) {
         // Update local data with regenerated CV
         setData(result.data);
       }
