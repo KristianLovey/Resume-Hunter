@@ -127,7 +127,9 @@ Now refine their CV using the refineCV tool.`,
     const toolResults = (result as unknown as { steps?: { type: string; toolResult?: unknown }[] }).steps || [];
     const refinedResult = toolResults
       .find((s: { type: string; toolResult?: unknown }) => s.type === "tool-result")
-      ?.toolResult as EditableCvData | undefined;
+      ?.toolResult as
+      | { refinedSummary: string; refinedExperiences: { title: string; bullets: string[] }[] }
+      | undefined;
 
     if (!refinedResult || !refinedResult.refinedSummary) {
       return Response.json(
