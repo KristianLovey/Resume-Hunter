@@ -79,6 +79,50 @@ export async function saveProfile(input: SaveProfileInput) {
   return { ok: true as const, message: "Profil spremljen" };
 }
 
+/* ===================== Brisanje računa ===================== */
+/**
+ * Trajno briše korisnikove podatke i auth račun.
+ * Traži potvrdu: klijent mora poslati točan email prijavljenog korisnika.
+ */
+export async function deleteAccount(confirmEmail: string) {
+  const { supabase, user } = await authed();
+
+  if (!confirmEmail || confirmEmail.trim().toLowerCase() !== (user.email ?? "").toLowerCase()) {
+    return { ok: false as const, message: "Upisani email ne odgovara tvom računu." };
+  }
+
+  // Podaci prvo (RLS ih ograničava na vlasnika), pa auth račun.
+  for (const table of ["applications", "projects", "education", "experiences", "profiles"]) {
+    const column = table === "profiles" ? "id" : "user_id";
+    const { error } = await supabase.from(table).delete().eq(column, user.id);
+    if (error) return { ok: false as const, message: `Brisanje (${table}): ${error.message}` };
+  }
+
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    await supabase.auth.signOut();
+    return { ok: false as const, message: "Podaci su obrisani, ali račun nije — nedostaje servisni ključ." };
+  }
+
+  // Admin API: brisanje auth korisnika ide preko servisnog ključa.
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/admin/users/${user.id}`,
+    {
+      method: "DELETE",
+      headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` },
+    }
+  );
+
+  if (!res.ok) {
+    const body = await res.text();
+    return { ok: false as const, message: `Račun nije obrisan: ${body.slice(0, 200)}` };
+  }
+
+  await supabase.auth.signOut();
+  revalidatePath("/", "layout");
+  return { ok: true as const, message: "Račun je obrisan." };
+}
+
 /* ===================== Iskustvo ===================== */
 export async function addExperience() {
   const { supabase, user } = await authed();

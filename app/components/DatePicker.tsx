@@ -98,7 +98,10 @@ export default function DatePicker({
       <input
         type="text"
         value={displayValue}
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={(e) => {
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+        }}
         readOnly
         placeholder={placeholder}
         style={{

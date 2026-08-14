@@ -5,36 +5,57 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function signup(formData: FormData) {
+export type AuthResult = { error?: string; redirect?: string };
+
+export async function signup(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
 
-  const { error } = await supabase.auth.signUp({ email, password });
+  if (!email || !password) {
+    return { error: "Email and password are required" };
+  }
+
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters" };
+  }
+
+  const { data, error } = await supabase.auth.signUp({ email, password });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
+  }
+
+  if (!data.user) {
+    return { error: "Failed to create account" };
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+
+  // Ako je session odmah aktivan (potvrda emaila isključena) — idi na dashboard.
+  // Inače korisnik mora potvrditi email prije prijave.
+  return { redirect: data.session ? "/dashboard" : "/login?success=true" };
 }
 
-export async function login(formData: FormData) {
+export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+
+  if (!email || !password) {
+    return { error: "Email and password are required" };
+  }
 
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
-    redirect(`/login?error=${encodeURIComponent(error.message)}`);
+    return { error: error.message };
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  return { redirect: "/dashboard" };
 }
 
 export async function logout() {

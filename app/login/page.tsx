@@ -1,8 +1,7 @@
 // app/login/page.tsx — Modern auth page in Resume Hunter style
 "use client";
 
-import { CSSProperties, useState, useTransition } from "react";
-import { login, signup } from "@/app/auth/actions";
+import { CSSProperties, useState } from "react";
 
 type Mode = "login" | "signup";
 
@@ -35,30 +34,36 @@ const ICheck = ({ size = 20, color = "currentColor" }: { size?: number; color?: 
 
 export default function AuthPage() {
   const [mode, setMode] = useState<Mode>("login");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (e: any, action: (formData: FormData) => Promise<void>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    setIsLoading(true);
+    setIsPending(true);
 
-    const formData = new FormData();
-    formData.append("email", email);
-    formData.append("password", password);
+    try {
+      const formData = new FormData(e.currentTarget);
+      const endpoint = mode === "login" ? "/auth?action=login" : "/auth?action=signup";
 
-    startTransition(async () => {
-      try {
-        await action(formData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Authentication failed");
-      } finally {
-        setIsLoading(false);
+      const response = await fetch(endpoint, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok || result.error) {
+        setError(result.error || "Authentication failed");
+        return;
       }
-    });
+
+      window.location.href = result.redirect || "/dashboard";
+    } catch (err: any) {
+      setError(err?.message || "An error occurred");
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const inputStyle: CSSProperties = {
@@ -85,8 +90,8 @@ export default function AuthPage() {
     fontFamily: "inherit",
     fontSize: 15,
     fontWeight: 700,
-    cursor: isLoading || isPending ? "default" : "pointer",
-    opacity: isLoading || isPending ? 0.7 : 1,
+    cursor: isPending ? "default" : "pointer",
+    opacity: isPending ? 0.7 : 1,
     transition: "all 0.2s ease",
     boxShadow: "0 8px 20px rgba(37,99,235,.3)",
   };
@@ -364,7 +369,7 @@ export default function AuthPage() {
 
         {/* Form */}
         <form
-          onSubmit={(e) => handleSubmit(e, mode === "login" ? login : signup)}
+          onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: 14 }}
         >
           {/* Email */}
@@ -376,10 +381,8 @@ export default function AuthPage() {
               type="email"
               name="email"
               placeholder="you@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading || isPending}
+              disabled={isPending}
               style={inputStyle}
             />
           </div>
@@ -393,11 +396,9 @@ export default function AuthPage() {
               type="password"
               name="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              disabled={isLoading || isPending}
+              disabled={isPending}
               style={inputStyle}
             />
           </div>
@@ -423,7 +424,7 @@ export default function AuthPage() {
           {/* Submit button */}
           <button
             type="submit"
-            disabled={isLoading || isPending}
+            disabled={isPending}
             style={{
               ...btnPrimary,
               marginTop: 8,
@@ -433,7 +434,7 @@ export default function AuthPage() {
               gap: 8,
             }}
           >
-            {isLoading || isPending ? (
+            {isPending ? (
               <>
                 <span style={{ display: "inline-block", animation: "spin 1s linear infinite" }}>⏳</span>
                 {mode === "login" ? "Signing in..." : "Creating account..."}
@@ -485,7 +486,7 @@ export default function AuthPage() {
         {/* OAuth (placeholder) */}
         <button
           type="button"
-          disabled={isLoading || isPending}
+          disabled={isPending}
           style={{
             ...btnSecondary,
             display: "flex",

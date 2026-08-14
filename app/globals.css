@@ -26,6 +26,90 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* ===================== Resume Hunter theme tokens ===================== */
+:root {
+  /* površine */
+  --rh-bg: #F1F4F9;
+  --rh-surface: #FFFFFF;
+  --rh-surface-2: #F7F9FD;
+  --rh-surface-3: #ECF1F9;
+
+  /* okviri — pojačan kontrast prema pozadini */
+  --rh-border: #D3DCEB;
+  --rh-border-strong: #BCC9DE;
+  --rh-border-soft: #E1E8F3;
+
+  /* tekst */
+  --rh-text: #0F1F44;
+  --rh-text-2: #3A4A66;
+  --rh-text-3: #6B7890;
+  --rh-text-4: #8A94A6;
+
+  /* brend */
+  --rh-accent: #2563EB;
+  --rh-accent-2: #3B82F6;
+  --rh-accent-dark: #1D4ED8;
+  --rh-accent-soft: #E4EDFE;
+  --rh-accent-soft-2: #D3E2FD;
+  --rh-accent-text: #1D3B86;
+
+  /* status */
+  --rh-success: #1FA463;
+  --rh-success-soft: #E2F6EB;
+  --rh-warn: #C98600;
+  --rh-warn-soft: #FDF1DA;
+  --rh-danger: #DC2626;
+  --rh-danger-soft: #FDE4E4;
+
+  /* sjene — jače odvajanje kartica od pozadine */
+  --rh-shadow-rgb: 16, 31, 68;
+  --rh-shadow-card: 0 1px 2px rgba(16, 31, 68, 0.06),
+    0 18px 40px -22px rgba(16, 31, 68, 0.35);
+  --rh-shadow-raised: 0 2px 6px rgba(16, 31, 68, 0.08),
+    0 26px 50px -24px rgba(16, 31, 68, 0.42);
+}
+
+html[data-theme="dark"] {
+  --rh-bg: #0C1220;
+  --rh-surface: #161E2E;
+  --rh-surface-2: #1C2536;
+  --rh-surface-3: #232E42;
+
+  --rh-border: #2E3A50;
+  --rh-border-strong: #3D4B65;
+  --rh-border-soft: #262F42;
+
+  --rh-text: #EAEFF8;
+  --rh-text-2: #C3CDDF;
+  --rh-text-3: #96A3B8;
+  --rh-text-4: #7D8AA0;
+
+  --rh-accent: #5B96FF;
+  --rh-accent-2: #74A8FF;
+  --rh-accent-dark: #3B7EF0;
+  --rh-accent-soft: #1D2C45;
+  --rh-accent-soft-2: #24375A;
+  --rh-accent-text: #A9C8FF;
+
+  --rh-success: #3DD68C;
+  --rh-success-soft: #14301F;
+  --rh-warn: #E5A93A;
+  --rh-warn-soft: #33260D;
+  --rh-danger: #F87171;
+  --rh-danger-soft: #3A1A1A;
+
+  --rh-shadow-rgb: 0, 0, 0;
+  --rh-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 18px 40px -20px rgba(0, 0, 0, 0.75);
+  --rh-shadow-raised: 0 2px 8px rgba(0, 0, 0, 0.5),
+    0 26px 50px -22px rgba(0, 0, 0, 0.8);
+}
+
+html[data-theme="dark"] body {
+  background: var(--rh-bg);
+  color: var(--rh-text);
+}
+
 /* ===================== Resume Hunter dashboard ===================== */
 @keyframes rh-spin {
   to {

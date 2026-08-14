@@ -107,6 +107,7 @@ const STEPS: { icon: React.ReactNode; tag: string; title: string; desc: string }
 
 /* ===================== Styles ===================== */
 const wrap: CSSProperties = { maxWidth: 1120, margin: "0 auto", padding: "0 24px", width: "100%" };
+const footLink: CSSProperties = { fontSize: 13.5, fontWeight: 600, color: "#5E6B86", textDecoration: "none" };
 const btnPrimary: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 9, padding: "14px 26px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#4C8DF7 0%,#2563EB 55%,#1D4ED8 100%)", color: "#fff", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "inset 0 1px 0 rgba(255,255,255,.22), 0 8px 20px -8px rgba(37,99,235,.42)" };
 const btnGhost: CSSProperties = { display: "inline-flex", alignItems: "center", gap: 8, padding: "14px 24px", borderRadius: 12, border: "1px solid #E4E9F2", background: "rgba(255,255,255,.7)", backdropFilter: "blur(6px)", WebkitBackdropFilter: "blur(6px)", color: "#42506B", fontFamily: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", textDecoration: "none", boxShadow: "0 1px 2px rgba(16,31,68,.04)" };
 
@@ -142,9 +143,20 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <a href="#features" className="rh-navlink" style={{ fontSize: 14, fontWeight: 700, color: "#5E6B86", textDecoration: "none" }}>Features</a>
-            <a href={ctaHref} className="rh-btn" style={{ ...btnPrimary, padding: "10px 18px", fontSize: 14, boxShadow: "0 6px 14px -6px rgba(37,99,235,.5)" }}>
-              {loggedIn ? "Dashboard" : "Log in"}
-            </a>
+            {!loggedIn ? (
+              <>
+                <a href="/login" className="rh-btn" style={{ ...btnGhost, padding: "10px 18px", fontSize: 14 }}>
+                  Log in
+                </a>
+                <a href="/login?mode=signup" className="rh-btn" style={{ ...btnPrimary, padding: "10px 18px", fontSize: 14, boxShadow: "0 6px 14px -6px rgba(37,99,235,.5)" }}>
+                  Sign up
+                </a>
+              </>
+            ) : (
+              <a href={ctaHref} className="rh-btn" style={{ ...btnPrimary, padding: "10px 18px", fontSize: 14, boxShadow: "0 6px 14px -6px rgba(37,99,235,.5)" }}>
+                Dashboard
+              </a>
+            )}
           </div>
         </div>
       </header>
@@ -324,13 +336,85 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
       </section>
 
       {/* ===== Footer ===== */}
-      <footer style={{ borderTop: "1px solid #EEF2F8", background: "#fff" }}>
-        <div style={{ ...wrap, display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 12, padding: "24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {logo}
-            <span style={{ fontSize: 14, fontWeight: 700, color: "#5E6B86" }}>Resume Hunter · AI agent for job applications</span>
+      <footer style={{ borderTop: "1px solid #DDE4F0", background: "#fff" }}>
+        <div style={{ ...wrap, padding: "44px 24px 20px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 40, justifyContent: "space-between" }}>
+            {/* Brand */}
+            <div style={{ maxWidth: 320, minWidth: 240 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+                {logo}
+                <span style={{ fontSize: 16, fontWeight: 800, color: "#0F1F44", letterSpacing: "-.01em" }}>
+                  Resume <span style={{ color: "#2563EB" }}>Hunter</span>
+                </span>
+              </div>
+              <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, color: "#5E6B86" }}>
+                AI agent that tailors your resume and cover letter to each job ad — so every application
+                actually fits the role.
+              </p>
+            </div>
+
+            {/* Product */}
+            <div style={{ minWidth: 150 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#0F1F44", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 14 }}>
+                Product
+              </div>
+              <nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <a href="#features" style={footLink}>Features</a>
+                <a href="/login" style={footLink}>Log in</a>
+                <a href="/login?mode=signup" style={footLink}>Sign up</a>
+              </nav>
+            </div>
+
+            {/* Legal */}
+            <div style={{ minWidth: 150 }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: "#0F1F44", textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 14 }}>
+                Legal
+              </div>
+              <nav style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                <a href="/terms" style={footLink}>Terms of Use</a>
+                <a href="/privacy" style={footLink}>Privacy Policy</a>
+                <a href="/cookies" style={footLink}>Cookies</a>
+              </nav>
+            </div>
           </div>
-          <div style={{ fontSize: 13, color: "#9AA6BA" }}>© {new Date().getFullYear()} Resume Hunter</div>
+
+          {/* AI disclaimer — pošteno upozorenje, ne marketing */}
+          <div
+            style={{
+              marginTop: 34,
+              padding: "14px 16px",
+              borderRadius: 12,
+              background: "#F7F9FD",
+              border: "1px solid #DDE4F0",
+              fontSize: 12.5,
+              lineHeight: 1.65,
+              color: "#5E6B86",
+            }}
+          >
+            Resume Hunter generates text with AI. Always review what it writes before sending it to an
+            employer — you are responsible for the content of your application. Match scores are an
+            estimate, not an assessment of your suitability.
+          </div>
+
+          <div
+            style={{
+              marginTop: 22,
+              paddingTop: 18,
+              borderTop: "1px solid #E8EDF5",
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 12,
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <div style={{ fontSize: 13, color: "#8A94A6" }}>© {new Date().getFullYear()} Resume Hunter</div>
+            <div style={{ display: "flex", gap: 18 }}>
+              <a href="/terms" style={{ ...footLink, fontSize: 13 }}>Terms</a>
+              <a href="/privacy" style={{ ...footLink, fontSize: 13 }}>Privacy</a>
+              <a href="/cookies" style={{ ...footLink, fontSize: 13 }}>Cookies</a>
+            </div>
+          </div>
         </div>
       </footer>
     </div>
