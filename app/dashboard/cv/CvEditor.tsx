@@ -86,7 +86,7 @@ export default function CvEditor({
     try {
       const result = await saveCvEdits(applicationId, data);
       if (!result.success) {
-        setError(result.error || "Neuspješno spremanje");
+        setError(result.error || "Could not save");
       } else {
         setEditMode(null);
         // Očisti localStorage nakon uspješnog spremanja
@@ -95,7 +95,7 @@ export default function CvEditor({
         setHasChanges(false);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Greška pri spremanju");
+      setError(e instanceof Error ? e.message : "Something went wrong while saving");
     } finally {
       setIsSaving(false);
     }
@@ -108,13 +108,13 @@ export default function CvEditor({
     try {
       const result = await regenerateCv(applicationId, data);
       if (!result.success) {
-        setError(result.error || "Neuspješna regeneracija");
+        setError(result.error || "Could not regenerate");
       } else if (result.data) {
         // Update local data with regenerated CV
         setData(result.data);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Greška pri regeneraciji");
+      setError(e instanceof Error ? e.message : "Something went wrong while regenerating");
     } finally {
       setIsRegenerating(false);
     }
@@ -145,7 +145,7 @@ export default function CvEditor({
                 flex: 1,
                 padding: "8px 10px",
                 borderRadius: 6,
-                border: "1px solid #2563EB",
+                border: "1px solid var(--rh-accent)",
                 fontFamily: "inherit",
                 fontSize: 13.5,
                 lineHeight: 1.5,
@@ -163,7 +163,7 @@ export default function CvEditor({
                 flex: 1,
                 padding: "8px 10px",
                 borderRadius: 6,
-                border: "1px solid #2563EB",
+                border: "1px solid var(--rh-accent)",
                 fontFamily: "inherit",
                 fontSize: 13.5,
                 lineHeight: 1.5,
@@ -177,7 +177,7 @@ export default function CvEditor({
               padding: "8px 14px",
               borderRadius: 6,
               border: "none",
-              background: "#2563EB",
+              background: "var(--rh-accent)",
               color: "#fff",
               fontWeight: 700,
               fontSize: 12.5,
@@ -195,9 +195,9 @@ export default function CvEditor({
             style={{
               padding: "8px 14px",
               borderRadius: 6,
-              border: "1px solid #E1E8F2",
-              background: "#fff",
-              color: "#42506B",
+              border: "1px solid var(--rh-border)",
+              background: "var(--rh-surface)",
+              color: "var(--rh-text-2)",
               fontWeight: 700,
               fontSize: 12.5,
               cursor: "pointer",
@@ -223,11 +223,11 @@ export default function CvEditor({
         onMouseLeave={(e) => !readOnly && (e.currentTarget.style.background = "rgba(37, 99, 235, 0.04)")}
       >
         {multiline ? (
-          <div style={{ fontSize: 13.5, lineHeight: 1.55, color: "#3A4A66", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          <div style={{ fontSize: 13.5, lineHeight: 1.55, color: "var(--rh-text-2)", whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
             {value}
           </div>
         ) : (
-          <div style={{ fontSize: 13.5, lineHeight: 1.5, color: "#3A4A66" }}>{value}</div>
+          <div style={{ fontSize: 13.5, lineHeight: 1.5, color: "var(--rh-text-2)" }}>{value}</div>
         )}
       </div>
     );
@@ -241,9 +241,9 @@ export default function CvEditor({
           style={{
             padding: "14px 16px",
             borderRadius: 8,
-            background: "#DBEAFE",
-            border: "1px solid #93C5FD",
-            color: "#1E40AF",
+            background: "var(--rh-accent-soft)",
+            border: "1px solid var(--rh-accent)",
+            color: "var(--rh-accent-text)",
             marginBottom: 16,
             display: "flex",
             alignItems: "center",
@@ -262,7 +262,7 @@ export default function CvEditor({
                 padding: "6px 12px",
                 borderRadius: 6,
                 border: "none",
-                background: "#2563EB",
+                background: "var(--rh-accent)",
                 color: "#fff",
                 fontWeight: 700,
                 fontSize: 12,
@@ -276,9 +276,9 @@ export default function CvEditor({
               style={{
                 padding: "6px 12px",
                 borderRadius: 6,
-                border: "1px solid #93C5FD",
-                background: "#fff",
-                color: "#1E40AF",
+                border: "1px solid var(--rh-accent)",
+                background: "var(--rh-surface)",
+                color: "var(--rh-accent-text)",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",
@@ -295,8 +295,8 @@ export default function CvEditor({
           style={{
             padding: "12px 16px",
             borderRadius: 8,
-            background: "#FEE2E2",
-            color: "#DC2626",
+            background: "var(--rh-danger-soft)",
+            color: "var(--rh-danger)",
             marginBottom: 16,
             fontSize: 13.5,
           }}
@@ -311,9 +311,9 @@ export default function CvEditor({
           style={{
             padding: "10px 12px",
             borderRadius: 6,
-            background: "#FEF3C7",
-            border: "1px solid #FCD34D",
-            color: "#92400E",
+            background: "var(--rh-warn-soft)",
+            border: "1px solid var(--rh-warn)",
+            color: "var(--rh-warn)",
             marginBottom: 14,
             fontSize: 12.5,
             fontWeight: 500,
@@ -325,7 +325,7 @@ export default function CvEditor({
 
       {/* Summary */}
       <div style={{ marginBottom: 24 }}>
-        <h3 style={{ fontSize: 13, fontWeight: 800, color: "#2563EB", textTransform: "uppercase", marginBottom: 10 }}>
+        <h3 style={{ fontSize: 13, fontWeight: 800, color: "var(--rh-accent)", textTransform: "uppercase", marginBottom: 10 }}>
           Professional Summary
         </h3>
         <EditableField
@@ -338,9 +338,9 @@ export default function CvEditor({
 
       {/* Experiences */}
       {data.experiences.map((exp, expIdx) => (
-        <div key={expIdx} style={{ marginBottom: 20, paddingLeft: 12, borderLeft: "2px solid #E5E7EB" }}>
+        <div key={expIdx} style={{ marginBottom: 20, paddingLeft: 12, borderLeft: "2px solid var(--rh-border)" }}>
           <div style={{ marginBottom: 10 }}>
-            <div style={{ fontSize: 11.5, fontWeight: 800, color: "#8A94A6", textTransform: "uppercase", marginBottom: 6 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--rh-text-3)", textTransform: "uppercase", marginBottom: 6 }}>
               Position
             </div>
             <EditableField
@@ -356,12 +356,12 @@ export default function CvEditor({
 
           {/* Bullets */}
           <div>
-            <div style={{ fontSize: 11.5, fontWeight: 800, color: "#8A94A6", textTransform: "uppercase", marginBottom: 8 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 800, color: "var(--rh-text-3)", textTransform: "uppercase", marginBottom: 8 }}>
               Achievements
             </div>
             {exp.bullets.map((bullet, bulletIdx) => (
               <div key={bulletIdx} style={{ marginBottom: 8, display: "flex", gap: 8 }}>
-                <span style={{ color: "#2563EB", fontWeight: 700, marginTop: 2 }}>▸</span>
+                <span style={{ color: "var(--rh-accent)", fontWeight: 700, marginTop: 2 }}>▸</span>
                 <EditableField
                   value={bullet}
                   mode={`exp-${expIdx}-bullet-${bulletIdx}` as EditMode}
@@ -387,9 +387,9 @@ export default function CvEditor({
             style={{
               padding: "10px 18px",
               borderRadius: 8,
-              border: "1px solid #DDE5F0",
-              background: "#fff",
-              color: "#2563EB",
+              border: "1px solid var(--rh-border)",
+              background: "var(--rh-surface)",
+              color: "var(--rh-accent)",
               fontWeight: 700,
               fontSize: 13.5,
               cursor: isRegenerating ? "default" : "pointer",
@@ -398,7 +398,7 @@ export default function CvEditor({
           >
             {isRegenerating ? "Regenerating..." : "🔄 Regenerate CV"}
           </button>
-          <div style={{ fontSize: 12, color: "#8A94A6", display: "flex", alignItems: "center" }}>
+          <div style={{ fontSize: 12, color: "var(--rh-text-3)", display: "flex", alignItems: "center" }}>
             Click any section to edit
           </div>
         </div>

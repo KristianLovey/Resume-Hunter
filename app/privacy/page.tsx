@@ -2,103 +2,114 @@ import type { Metadata } from "next";
 import LegalPage, { LegalSection, CONTACT_EMAIL } from "@/app/components/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Pravila privatnosti — Resume Hunter",
-  description: "Kako Resume Hunter prikuplja, koristi i štiti tvoje podatke.",
+  title: "Privacy Policy | Resume Hunter",
+  description: "How Resume Hunter collects, uses and protects your data.",
 };
 
 export default function PrivacyPage() {
   return (
     <LegalPage
-      title="Pravila privatnosti"
-      intro="Ovdje piše koje podatke Resume Hunter prikuplja, zašto ih obrađuje, s kime ih dijeli i kako ih možeš obrisati."
+      title="Privacy Policy"
+      intro="This page explains what data Resume Hunter collects, why it processes it, who it is shared with, and how you can delete it."
     >
-      <LegalSection title="1. Koje podatke prikupljamo">
+      <LegalSection title="1. What we collect">
         <ul style={{ margin: 0, paddingLeft: 22 }}>
           <li>
-            <strong>Podaci računa:</strong> email adresa i lozinka (lozinka je pohranjena kriptirano —
-            nikad je ne vidimo u čitljivom obliku).
+            <strong>Account data:</strong> your email address and password (the password is stored
+            encrypted, we never see it in readable form).
           </li>
           <li>
-            <strong>Podaci profila koje sam unosiš:</strong> ime, datum rođenja, telefon, lokacija, opis,
-            radno iskustvo, obrazovanje, projekti, vještine, certifikati, snage i hobiji.
+            <strong>Profile data you enter:</strong> name, date of birth, phone, location, description,
+            work experience, education, projects, skills, certificates, strengths and hobbies.
           </li>
           <li>
-            <strong>Podaci prijava:</strong> tekst oglasa koji zalijepiš te generirani životopis,
-            motivacijsko pismo, procjena podudaranja i status prijave.
+            <strong>Application data:</strong> the job ad text you paste, plus the generated resume, cover
+            letter, match score and application status.
           </li>
           <li>
-            <strong>Tehnički podaci:</strong> kolačići sesije potrebni za prijavu.
+            <strong>Technical data:</strong> session cookies required to keep you signed in.
           </li>
         </ul>
       </LegalSection>
 
-      <LegalSection title="2. Zašto ih obrađujemo">
+      <LegalSection title="2. Why we process it">
         <p style={{ margin: 0 }}>
-          Podatke obrađujemo isključivo kako bismo ti omogućili korištenje usluge: vođenje računa,
-          generiranje prilagođenog životopisa i pisma te spremanje i pregled tvojih prijava.
-          Pravna osnova je izvršenje ugovora — pružanje usluge koju si zatražio.
-          Ne koristimo tvoje podatke za oglašavanje i ne prodajemo ih.
+          We process your data only to provide the service: running your account, generating a tailored
+          resume and cover letter, and storing and displaying your applications. The legal basis is
+          performance of a contract, namely providing the service you asked for. We do not use your data
+          for advertising and we do not sell it.
         </p>
       </LegalSection>
 
-      <LegalSection title="3. S kime dijelimo podatke">
+      <LegalSection title="3. Who we share it with">
         <p style={{ margin: "0 0 10px" }}>
-          Podatke dijelimo samo s pružateljima usluga nužnima za rad aplikacije:
+          We share data only with the providers needed to run the application:
         </p>
         <ul style={{ margin: 0, paddingLeft: 22 }}>
           <li>
-            <strong>Supabase</strong> — baza podataka, prijava i pohrana tvojih podataka.
+            <strong>Supabase:</strong> database, authentication and storage of your data.
           </li>
           <li>
-            <strong>Google (Gemini API)</strong> — generiranje teksta. Kad pokreneš generiranje, podaci
-            tvog profila i tekst oglasa šalju se modelu kako bi se sastavio životopis i pismo.
+            <strong>Google (Gemini API):</strong> text generation. When you start a generation, your
+            profile data and the job ad text are sent to the model so it can compose the resume and letter.
           </li>
         </ul>
         <p style={{ margin: "10px 0 0" }}>
-          Ovi pružatelji podatke obrađuju u naše ime i podliježu vlastitim uvjetima obrade podataka.
+          These providers process the data on our behalf and are subject to their own data processing
+          terms.
         </p>
       </LegalSection>
 
-      <LegalSection title="4. Koliko dugo čuvamo podatke">
+      <LegalSection title="4. How long we keep it">
         <p style={{ margin: 0 }}>
-          Podatke čuvamo dok imaš račun. Kad obrišeš račun, brišu se tvoj profil, iskustva, obrazovanje,
-          projekti i sve prijave, kao i sam korisnički račun.
+          We keep your data for as long as you have an account. When you delete your account, your profile,
+          experience, education, projects and all applications are deleted along with the account itself.
         </p>
       </LegalSection>
 
-      <LegalSection title="5. Sigurnost">
+      <LegalSection title="5. Security">
         <p style={{ margin: 0 }}>
-          Pristup podacima ograničen je na razini baze (row-level security) tako da svaki korisnik može
-          čitati i mijenjati isključivo vlastite zapise. Promet između preglednika i poslužitelja je
-          kriptiran. Nijedan sustav nije potpuno neprobojan — koristi jedinstvenu lozinku i ne dijeli je.
+          Access is restricted at the database level (row level security), so each user can read and change
+          only their own records. Traffic between your browser and the server is encrypted. No system is
+          completely impenetrable, so use a unique password and do not share it.
         </p>
       </LegalSection>
 
-      <LegalSection title="6. Tvoja prava">
-        <p style={{ margin: "0 0 10px" }}>Imaš pravo na:</p>
+      <LegalSection title="6. Your rights">
+        <p style={{ margin: "0 0 10px" }}>You have the right to:</p>
         <ul style={{ margin: 0, paddingLeft: 22 }}>
-          <li>pristup svojim podacima — vidljivi su i uredivi u tvom profilu;</li>
-          <li>ispravak — svako polje profila možeš izmijeniti u aplikaciji;</li>
+          <li>access your data, it is visible and editable in your profile;</li>
+          <li>correct it, every profile field can be changed in the app;</li>
           <li>
-            brisanje — u <strong>Postavke → Brisanje računa</strong> trajno brišeš račun i sve podatke;
+            delete it, under <strong>Settings, Delete account</strong> you permanently remove your account
+            and all data;
           </li>
-          <li>prigovor na obradu i pritužbu nadzornom tijelu za zaštitu podataka.</li>
+          <li>object to processing and lodge a complaint with your data protection authority.</li>
         </ul>
       </LegalSection>
 
-      <LegalSection title="7. Djeca">
+      <LegalSection title="7. Children">
         <p style={{ margin: 0 }}>
-          Usluga nije namijenjena osobama mlađima od 16 godina. Ako saznamo da smo prikupili podatke
-          takve osobe bez privole roditelja, obrisat ćemo ih.
+          The service is not intended for people under 16. If we learn that we have collected such data
+          without parental consent, we will delete it.
         </p>
       </LegalSection>
 
-      <LegalSection title="8. Kontakt">
+      <LegalSection title="8. Contact">
         <p style={{ margin: 0 }}>
           {CONTACT_EMAIL ? (
-            <>Za pitanja o privatnosti ili zahtjev za podacima piši na <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--rh-accent)" }}>{CONTACT_EMAIL}</a>.</>
+            <>
+              For privacy questions or a data request, write to{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} style={{ color: "var(--rh-accent)" }}>
+                {CONTACT_EMAIL}
+              </a>
+              .
+            </>
           ) : (
-            <>Za pitanja o privatnosti kontaktiraj vlasnika usluge putem kontakta objavljenog na naslovnici.</>
+            <>
+              For privacy questions, contact the service owner using the contact details published on the
+              home page.
+            </>
           )}
         </p>
       </LegalSection>

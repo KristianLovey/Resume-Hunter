@@ -131,20 +131,35 @@ const ILogout = ({ size = 17, color = "currentColor", w = 2 }: IconProps) => (
 /* ===================== Data ===================== */
 type Tone = { name: string; desc: string };
 const TONES: Tone[] = [
-  { name: "Profesionalan", desc: "Jasno i pouzdano" },
-  { name: "Samouvjeren", desc: "Odlučno i direktno" },
-  { name: "Prijateljski", desc: "Toplo i pristupačno" },
-  { name: "Kreativan", desc: "Maštovito i živo" },
-  { name: "Formalan", desc: "Klasično i uljudno" },
+  { name: "Professional", desc: "Clear and dependable" },
+  { name: "Confident", desc: "Decisive and direct" },
+  { name: "Friendly", desc: "Warm and approachable" },
+  { name: "Creative", desc: "Imaginative and lively" },
+  { name: "Formal", desc: "Classic and polite" },
 ];
 const TONE_TINT: Record<string, string> = {
-  Profesionalan: "var(--rh-accent)",
-  Samouvjeren: "#0EA5E9",
-  Prijateljski: "#7C3AED",
-  Kreativan: "#DB2777",
-  Formalan: "#0F766E",
+  Professional: "var(--rh-accent)",
+  Confident: "#0EA5E9",
+  Friendly: "#7C3AED",
+  Creative: "#DB2777",
+  Formal: "#0F766E",
 };
-// Sigurna poveznica za render — dopusti samo http(s) (spriječi javascript:/data: XSS).
+// Profiles saved before the UI moved to English still hold Croatian tone names.
+// Map them across so the saved tone stays selected instead of silently resetting.
+const LEGACY_TONES: Record<string, string> = {
+  Profesionalan: "Professional",
+  Samouvjeren: "Confident",
+  Prijateljski: "Friendly",
+  Kreativan: "Creative",
+  Formalan: "Formal",
+};
+function normalizeTone(tone: string | null | undefined): string {
+  const t = (tone || "").trim();
+  if (!t) return "Professional";
+  if (LEGACY_TONES[t]) return LEGACY_TONES[t];
+  return TONES.some((x) => x.name === t) ? t : "Professional";
+}
+// Sigurna poveznica za render, dopusti samo http(s) (spriječi javascript:/data: XSS).
 function safeHref(raw: string): string {
   const s = (raw || "").trim();
   if (/^https?:\/\//i.test(s)) return s;
@@ -154,48 +169,48 @@ function safeHref(raw: string): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  draft: "Skica",
-  applied: "Prijavljeno",
-  interview: "Razgovor",
-  offer: "Ponuda",
-  rejected: "Odbijeno",
+  draft: "Draft",
+  applied: "Applied",
+  interview: "Interview",
+  offer: "Offer",
+  rejected: "Rejected",
 };
 const WORK = [
-  "Analiziram tvoj profil i vještine",
-  "Pregledavam oglas i web stranicu tvrtke",
-  "Pronalazim ključne riječi i zahtjeve",
-  "Pišem prilagođeni životopis",
-  "Sastavljam motivacijsko pismo",
+  "Analysing your profile and skills",
+  "Reviewing the ad and the company site",
+  "Finding keywords and requirements",
+  "Writing your tailored resume",
+  "Composing your cover letter",
 ];
 
-// Predlošci kategorija vještina (klik dodaje praznu kategoriju koju puniš).
+// Skill category templates (clicking adds an empty category you then fill in).
 const SKILL_CATEGORY_TEMPLATES = [
-  "Jezici",
-  "IT & tehnologije",
-  "Ekonomija & poslovanje",
-  "Dizajn",
+  "Languages",
+  "IT & technology",
+  "Business & finance",
+  "Design",
   "Marketing",
-  "Menadžment",
-  "Ostalo",
+  "Management",
+  "Other",
 ];
-// Predložene vještine po kategoriji (klik dodaje u tu kategoriju).
+// Suggested skills per category (clicking adds it to that category).
 const SKILL_SUGGESTIONS: Record<string, string[]> = {
-  Jezici: ["Hrvatski", "Engleski", "Njemački", "Talijanski", "Španjolski", "Francuski", "Slovenski"],
-  "IT & tehnologije": ["JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Python", "SQL", "PostgreSQL", "Git", "Docker", "AWS", "HTML/CSS"],
-  "Ekonomija & poslovanje": ["Vođenje projekata", "Agilne metode", "Analitika", "Pregovaranje", "Excel", "Financije", "Prodaja"],
-  Dizajn: ["Figma", "Photoshop", "Illustrator", "UI/UX", "Wireframing", "Prototipiranje", "Brand dizajn"],
-  Marketing: ["SEO", "Google Ads", "Content marketing", "Društvene mreže", "Email marketing", "Copywriting", "Analitika"],
-  Menadžment: ["Vodstvo tima", "Komunikacija", "Organizacija", "Mentorstvo", "Donošenje odluka", "Upravljanje vremenom"],
-  Ostalo: ["Vozačka B kategorija", "Timski rad", "Rješavanje problema", "Kreativnost", "Prilagodljivost"],
+  Languages: ["English", "German", "Italian", "Spanish", "French", "Croatian", "Slovenian"],
+  "IT & technology": ["JavaScript", "TypeScript", "React", "Next.js", "Node.js", "Python", "SQL", "PostgreSQL", "Git", "Docker", "AWS", "HTML/CSS"],
+  "Business & finance": ["Project management", "Agile methods", "Analytics", "Negotiation", "Excel", "Finance", "Sales"],
+  Design: ["Figma", "Photoshop", "Illustrator", "UI/UX", "Wireframing", "Prototyping", "Brand design"],
+  Marketing: ["SEO", "Google Ads", "Content marketing", "Social media", "Email marketing", "Copywriting", "Analytics"],
+  Management: ["Team leadership", "Communication", "Organisation", "Mentoring", "Decision making", "Time management"],
+  Other: ["Driving licence (B)", "Teamwork", "Problem solving", "Creativity", "Adaptability"],
 };
 
-// Predloženi hobiji grupirani po kategorijama (klik (de)selektira).
+// Suggested hobbies grouped by category (clicking toggles selection).
 const HOBBY_SUGGESTIONS: { name: string; items: string[] }[] = [
-  { name: "Sport i rekreacija", items: ["Planinarenje", "Trčanje", "Nogomet", "Košarka", "Biciklizam", "Plivanje", "Joga", "Teretana", "Tenis"] },
-  { name: "Umjetnost i kultura", items: ["Fotografija", "Sviranje instrumenta", "Slikanje", "Pisanje", "Kazalište", "Film", "Ples"] },
-  { name: "Tehnologija", items: ["Programiranje", "Gaming", "Robotika", "3D printanje", "Elektronika"] },
-  { name: "Priroda i putovanja", items: ["Putovanja", "Kampiranje", "Vrtlarstvo", "Ribolov", "Promatranje ptica"] },
-  { name: "Društvo i um", items: ["Šah", "Čitanje", "Volontiranje", "Kuhanje", "Društvene igre", "Učenje jezika"] },
+  { name: "Sport and recreation", items: ["Hiking", "Running", "Football", "Basketball", "Cycling", "Swimming", "Yoga", "Gym", "Tennis"] },
+  { name: "Arts and culture", items: ["Photography", "Playing an instrument", "Painting", "Writing", "Theatre", "Film", "Dance"] },
+  { name: "Technology", items: ["Programming", "Gaming", "Robotics", "3D printing", "Electronics"] },
+  { name: "Nature and travel", items: ["Travel", "Camping", "Gardening", "Fishing", "Birdwatching"] },
+  { name: "Social and mind", items: ["Chess", "Reading", "Volunteering", "Cooking", "Board games", "Language learning"] },
 ];
 
 /* ===================== Props ===================== */
@@ -273,8 +288,9 @@ const sectionHead = (icon: React.ReactNode, title: string, sub: string) => (
 
 type Screen = "profile" | "hunter" | "dashboard" | "settings";
 type HunterStep = "input" | "working" | "result";
+type HunterMode = "generate" | "chat";
 
-// Inline dodavanje chipa (zamjena za window.prompt — koji nije podržan u VS Code browseru).
+// Inline dodavanje chipa (zamjena za window.prompt, koji nije podržan u VS Code browseru).
 function ChipAdder({ placeholder, onAdd }: { placeholder: string; onAdd: (v: string) => void }) {
   const [v, setV] = useState("");
   const submit = () => {
@@ -298,7 +314,7 @@ function ChipAdder({ placeholder, onAdd }: { placeholder: string; onAdd: (v: str
         placeholder={placeholder}
         style={{ width: 168, padding: "7px 13px", border: "1px solid var(--rh-border)", borderRadius: 999, font: "inherit", fontSize: 13, color: "var(--rh-text)", background: "var(--rh-surface)" }}
       />
-      <button type="button" onClick={submit} title="Dodaj" style={{ ...chipAdd, padding: "7px 13px" }}>+ Dodaj</button>
+      <button type="button" onClick={submit} title="Add" style={{ ...chipAdd, padding: "7px 13px" }}>+ Add</button>
     </span>
   );
 }
@@ -314,14 +330,14 @@ function Note({ ok, children }: { ok: boolean; children: React.ReactNode }) {
 }
 
 /* ===================== Period (mjesec/godina) picker ===================== */
-const MONTHS_HR = ["Siječanj", "Veljača", "Ožujak", "Travanj", "Svibanj", "Lipanj", "Srpanj", "Kolovoz", "Rujan", "Listopad", "Studeni", "Prosinac"];
+const MONTHS_HR = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 const NOW_YEAR = new Date().getFullYear();
 const YEAR_OPTIONS = Array.from({ length: NOW_YEAR - 1969 }, (_, i) => String(NOW_YEAR - i));
 
 function parsePeriod(v: string) {
   const res = { fromM: "", fromY: "", toM: "", toY: "", current: false };
   if (!v) return res;
-  const parts = v.split(/\s*[-–—]\s*/);
+  const parts = v.split(/\s*[-–,]\s*/);
   const parseOne = (s: string) => {
     const m = s.match(/(\d{1,2})[/.](\d{4})/);
     return m ? { mo: String(parseInt(m[1], 10)), yr: m[2] } : null;
@@ -392,7 +408,7 @@ function PeriodField({ name, defaultValue }: { name: string; defaultValue: strin
     <div ref={wrapRef} style={{ position: "relative" }}>
       <input type="hidden" name={name} value={value} readOnly />
       <button type="button" onClick={() => setOpen((o) => !o)} className="rh-field" style={{ ...fieldSm, textAlign: "left", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-        <span style={{ color: value ? "var(--rh-text)" : "var(--rh-text-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{value || "Odaberi razdoblje"}</span>
+        <span style={{ color: value ? "var(--rh-text)" : "var(--rh-text-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{value || "Select a period"}</span>
         <IChevron size={14} color="var(--rh-text-3)" />
       </button>
 
@@ -428,7 +444,7 @@ function PeriodField({ name, defaultValue }: { name: string; defaultValue: strin
 
           <label style={{ display: "flex", alignItems: "center", gap: 9, cursor: "pointer", fontSize: 13, fontWeight: 600, color: "var(--rh-text-2)", marginBottom: 16 }}>
             <input type="checkbox" checked={current} onChange={(e) => setCurrent(e.target.checked)} style={{ width: 16, height: 16, accentColor: "var(--rh-accent)", cursor: "pointer" }} />
-            Trenutno radim ovdje (present)
+            I currently work here (present)
           </label>
 
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
@@ -462,12 +478,12 @@ export default function DashboardApp({
   const [previewOpen, setPreviewOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
-  // Postavke — brisanje računa
+  // Settings, brisanje računa
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleteError, setDeleteError] = useState("");
   const [isDeleting, startDelete] = useTransition();
 
-  // Profil — kontrolirana polja (init iz baze)
+  // Profil, kontrolirana polja (init iz baze)
   const [fullName, setFullName] = useState(profile.full_name);
   const [dob, setDob] = useState(profile.date_of_birth);
   const [phone, setPhone] = useState(profile.phone);
@@ -475,7 +491,7 @@ export default function DashboardApp({
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [filteredCities, setFilteredCities] = useState<typeof import("@/lib/locationData").MAJOR_CITIES>([]);
   const [bio, setBio] = useState(profile.bio);
-  const [selectedTone, setSelectedTone] = useState(profile.default_tone || "Profesionalan");
+  const [selectedTone, setSelectedTone] = useState(normalizeTone(profile.default_tone));
   const [skills, setSkills] = useState<SkillCategory[]>(profile.skills.categories);
   const [hobbies, setHobbies] = useState<string[]>(profile.hobbies);
   const [certificates, setCertificates] = useState<string[]>(profile.certificates);
@@ -483,8 +499,9 @@ export default function DashboardApp({
   const [isSaving, startSave] = useTransition();
 
   // Hunter
-  const [hunterTone, setHunterTone] = useState(profile.default_tone || "Profesionalan");
+  const [hunterTone, setHunterTone] = useState(normalizeTone(profile.default_tone));
   const [hunterStep, setHunterStep] = useState<HunterStep>("input");
+  const [hunterMode, setHunterMode] = useState<HunterMode>("generate");
   const [workIdx, setWorkIdx] = useState(0);
   const [toast, setToast] = useState("");
   const [jobText, setJobText] = useState("");
@@ -529,56 +546,56 @@ export default function DashboardApp({
 
   // Stvarna popunjenost profila (živi izračun dok uređuješ).
   const completionChecks = [
-    { ok: !!fullName.trim(), hint: "Dodaj ime i prezime" },
-    { ok: !!dob, hint: "Dodaj datum rođenja" },
-    { ok: !!bio.trim(), hint: "Napiši kratki opis o sebi" },
-    { ok: experiences.some((e) => (e.company || e.position || e.description || "").trim()), hint: "Dodaj radno iskustvo" },
-    { ok: education.some((e) => (e.institution || e.title || "").trim()), hint: "Dodaj obrazovanje" },
-    { ok: skills.some((c) => c.items.length > 0), hint: "Dodaj barem jednu vještinu" },
-    { ok: hobbies.length >= 3, hint: "Odaberi barem 3 hobija" },
+    { ok: !!fullName.trim(), hint: "Add your first and last name" },
+    { ok: !!dob, hint: "Add your date of birth" },
+    { ok: !!bio.trim(), hint: "Write a short description about yourself" },
+    { ok: experiences.some((e) => (e.company || e.position || e.description || "").trim()), hint: "Add radno iskustvo" },
+    { ok: education.some((e) => (e.institution || e.title || "").trim()), hint: "Add obrazovanje" },
+    { ok: skills.some((c) => c.items.length > 0), hint: "Add at least one skill" },
+    { ok: hobbies.length >= 3, hint: "Pick at least 3 hobbies" },
   ];
   const completionDone = completionChecks.filter((c) => c.ok).length;
   const completionPct = Math.round((completionDone / completionChecks.length) * 100);
   const completionHint = completionChecks.find((c) => !c.ok)?.hint;
 
   /**
-   * Provjera spremnosti profila za Hunter — deterministička, bez AI-ja.
+   * Provjera spremnosti profila za Hunter, deterministička, bez AI-ja.
    * "blocking" znači da bez toga generirani CV nema od čega nastati.
    */
   const readinessChecks = [
-    { label: "Ime i prezime", ok: !!fullName.trim(), blocking: true, fix: "Upiši ime i prezime u profilu." },
+    { label: "Full name", ok: !!fullName.trim(), blocking: true, fix: "Enter your first and last name in your profile." },
     {
-      label: "Radno iskustvo",
+      label: "Work experience",
       ok: experiences.some((e) => (e.position || "").trim() && (e.company || "").trim()),
       blocking: true,
-      fix: "Dodaj barem jedno iskustvo s pozicijom i tvrtkom.",
+      fix: "Add at least one role with a position and company.",
     },
     {
-      label: "Opisi iskustva",
+      label: "Experience descriptions",
       ok: experiences.some((e) => (e.description || "").trim().length >= 40),
       blocking: true,
-      fix: "Opiši što si radio na barem jednom poslu (2–3 rečenice).",
+      fix: "Describe what you did in at least one job (2 to 3 sentences).",
     },
     {
-      label: "Vještine",
+      label: "Skills",
       ok: skills.reduce((n, c) => n + c.items.length, 0) >= 3,
       blocking: true,
-      fix: "Dodaj barem 3 vještine.",
+      fix: "Add at least 3 skills.",
     },
-    { label: "Kratki opis o sebi", ok: bio.trim().length >= 40, blocking: false, fix: "Napiši 2–3 rečenice o sebi." },
+    { label: "Short description about you", ok: bio.trim().length >= 40, blocking: false, fix: "Write 2 to 3 sentences about yourself." },
     {
-      label: "Obrazovanje",
+      label: "Education",
       ok: education.some((e) => (e.institution || "").trim()),
       blocking: false,
-      fix: "Dodaj školu ili fakultet.",
+      fix: "Add a school or university.",
     },
-    { label: "Kontakt (telefon)", ok: !!phone.trim(), blocking: false, fix: "Dodaj broj telefona." },
-    { label: "Lokacija", ok: !!location.trim(), blocking: false, fix: "Dodaj grad u kojem tražiš posao." },
+    { label: "Contact (phone)", ok: !!phone.trim(), blocking: false, fix: "Add a phone number." },
+    { label: "Location", ok: !!location.trim(), blocking: false, fix: "Add the city where you are job hunting." },
     {
-      label: "Projekti ili certifikati",
+      label: "Projects or certificates",
       ok: projects.some((p) => (p.name || "").trim()) || certificates.length > 0,
       blocking: false,
-      fix: "Dodaj projekt ili certifikat — jača prijavu.",
+      fix: "Add a project or certificate. It strengthens your application.",
     },
   ];
   const readinessBlocking = readinessChecks.filter((c) => c.blocking && !c.ok);
@@ -618,7 +635,7 @@ export default function DashboardApp({
         certificates,
         strengths,
       });
-      showToast(res?.ok ? "Profile saved" : res?.message || "Greška pri spremanju");
+      showToast(res?.ok ? "Profile saved" : res?.message || "Something went wrong while saving");
     });
   }
 
@@ -661,7 +678,7 @@ export default function DashboardApp({
   async function generate() {
     const text = jobText.trim();
     if (!text) {
-      showToast("Zalijepi tekst oglasa za posao.");
+      showToast("Paste the job ad text.");
       return;
     }
     setHunterResult(null);
@@ -682,7 +699,7 @@ export default function DashboardApp({
       if (intervalRef.current) clearInterval(intervalRef.current);
       if (!res.ok) {
         setHunterStep("input");
-        showToast(data?.error || "Greška pri generiranju.");
+        showToast(data?.error || "Something went wrong while generating.");
         return;
       }
       setWorkIdx(WORK.length);
@@ -691,7 +708,7 @@ export default function DashboardApp({
     } catch {
       if (intervalRef.current) clearInterval(intervalRef.current);
       setHunterStep("input");
-      showToast("Agent trenutno nije dostupan.");
+      showToast("The agent is unavailable right now.");
     }
   }
 
@@ -699,7 +716,7 @@ export default function DashboardApp({
     try {
       navigator.clipboard.writeText(hunterResult?.coverLetter || "");
     } catch {}
-    showToast("Motivacijsko pismo kopirano");
+    showToast("Cover letter copied");
   }
   function resetHunter() {
     setHunterStep("input");
@@ -710,10 +727,10 @@ export default function DashboardApp({
     resetHunter();
     go("hunter");
   }
-  // Otvori spremljenu prijavu u Hunter "result" prikazu (reuse istog UI-ja)
+  // Open spremljenu prijavu u Hunter "result" prikazu (reuse istog UI-ja)
   function openApplication(app: ApplicationRow) {
     const pj = app.parsed_job && typeof app.parsed_job === "object" ? app.parsed_job : {};
-    setHunterTone(app.tone || "Profesionalan");
+    setHunterTone(app.tone || "Professional");
     setHunterResult({
       coverLetter: app.cover_letter || "",
       cvSuggestions: Array.isArray(app.cv_suggestions) ? app.cv_suggestions : [],
@@ -734,10 +751,13 @@ export default function DashboardApp({
       display: "flex",
       alignItems: "center",
       gap: 12,
-      padding: "11px 14px",
+      // Aktivna stavka ima i traku s lijeve strane, ne samo drugu boju,
+      // da se razlikuje i kad se boje ne razaznaju.
+      padding: "11px 14px 11px 11px",
       borderRadius: 12,
       cursor: "pointer",
       border: "none",
+      borderLeft: active ? "3px solid var(--rh-accent)" : "3px solid transparent",
       width: "100%",
       textAlign: "left",
       fontFamily: "inherit",
@@ -755,7 +775,7 @@ export default function DashboardApp({
     <div style={{ flex: "none", width: sidebarOpen ? 266 : 0, transition: "width .26s ease", position: "sticky", top: 0, height: "100vh", overflow: "hidden", zIndex: 5 }}>
       <aside style={{ width: 266, height: "100vh", background: "var(--rh-surface)", borderRight: "1px solid rgba(var(--rh-shadow-rgb),.06)", display: "flex", flexDirection: "column", padding: "22px 18px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 11, padding: "4px 2px 0" }}>
-          <a href="/" title="Povratak na naslovnicu" aria-label="Povratak na naslovnicu" style={{ display: "inline-flex", flex: "none", textDecoration: "none" }}>
+          <a href="/" title="Back to home" aria-label="Back to home" style={{ display: "inline-flex", flex: "none", textDecoration: "none" }}>
             {logoOk ? (
               <img src="/logo.png" alt="Resume Hunter" onError={() => setLogoOk(false)} style={{ width: 42, height: 42, flex: "none", objectFit: "contain", borderRadius: 11 }} />
             ) : (
@@ -768,9 +788,9 @@ export default function DashboardApp({
             <div style={{ fontSize: 18, fontWeight: 800, letterSpacing: "-.01em" }}>
               <span style={{ color: "var(--rh-text)" }}>Resume</span> <span style={{ color: "var(--rh-accent)" }}>Hunter</span>
             </div>
-            <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--rh-text-3)", letterSpacing: ".02em", marginTop: 2 }}>AI agent za pametnije prijave</div>
+            <div style={{ fontSize: 10.5, fontWeight: 600, color: "var(--rh-text-3)", letterSpacing: ".02em", marginTop: 2 }}>AI agent for smarter applications</div>
           </div>
-          <button type="button" onClick={() => setSidebarOpen(false)} title="Sakrij izbornik" className="rh-icon" style={{ ...iconBtn, width: 30, height: 30, flex: "none" }}>
+          <button type="button" onClick={() => setSidebarOpen(false)} title="Hide menu" className="rh-icon" style={{ ...iconBtn, width: 30, height: 30, flex: "none" }}>
             <IChevronLeft size={16} color="var(--rh-text-3)" />
           </button>
         </div>
@@ -778,7 +798,7 @@ export default function DashboardApp({
       <nav style={{ display: "flex", flexDirection: "column", gap: 6, marginTop: 30 }}>
         <button onClick={() => go("profile")} style={navStyle("profile")}>
           <IUser />
-          <span>Moj profil</span>
+          <span>My profile</span>
         </button>
         <button onClick={() => go("hunter")} style={navStyle("hunter")}>
           <ISearch />
@@ -791,7 +811,7 @@ export default function DashboardApp({
         </button>
         <button onClick={() => go("settings")} style={navStyle("settings")}>
           <ICog />
-          <span>Postavke</span>
+          <span>Settings</span>
         </button>
       </nav>
 
@@ -803,7 +823,7 @@ export default function DashboardApp({
                 <ICheck size={11} color="var(--rh-success)" w={3} />
               </span>
             )}
-            <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--rh-text-2)", letterSpacing: "-.01em" }}>Dovršenost profila</span>
+            <span style={{ fontSize: 12.5, fontWeight: 700, color: "var(--rh-text-2)", letterSpacing: "-.01em" }}>Profile completeness</span>
           </div>
           <span style={{ fontSize: 13.5, fontWeight: 800, color: completionPct === 100 ? "var(--rh-success)" : "var(--rh-accent)" }}>{completionPct}%</span>
         </div>
@@ -811,7 +831,7 @@ export default function DashboardApp({
           <div style={{ height: "100%", width: `${completionPct}%`, borderRadius: 6, background: completionPct === 100 ? "linear-gradient(90deg,#22C55E,var(--rh-success))" : "linear-gradient(90deg,var(--rh-accent-2),var(--rh-accent))", transition: "width .35s ease" }} />
         </div>
         <div style={{ fontSize: 11.5, color: "var(--rh-text-3)", lineHeight: 1.45, marginTop: 10 }}>
-          {completionHint ? `${completionHint} za bolje rezultate.` : "Profil je potpun — spreman za Hunter."}
+          {completionHint ? `${completionHint} for better results.` : "Profile complete and ready for Hunter."}
         </div>
       </div>
 
@@ -831,7 +851,7 @@ export default function DashboardApp({
           {theme === "dark" ? <ISun size={16} color="var(--rh-text-4)" /> : <IMoon size={16} color="var(--rh-text-4)" />}
         </button>
         <form action={logout}>
-          <button type="submit" title="Odjava" className="rh-icon" style={{ ...iconBtn, width: 32, height: 32, border: "1px solid var(--rh-border-soft)" }}>
+          <button type="submit" title="Log out" className="rh-icon" style={{ ...iconBtn, width: 32, height: 32, border: "1px solid var(--rh-border-soft)" }}>
             <ILogout size={16} color="var(--rh-text-4)" />
           </button>
         </form>
@@ -843,24 +863,24 @@ export default function DashboardApp({
   /* ===================== Screen: Profile ===================== */
   const profileScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "color-mix(in srgb, var(--rh-bg) 82%, transparent)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em" }}>Moj profil</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Izgradi svoj profil jednom — Hunter ga koristi za svaku prijavu.</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em" }}>My profile</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Build your profile once. Hunter uses it for every application.</p>
         </div>
         <div style={{ display: "flex", gap: 10 }}>
           <button type="button" onClick={() => setPreviewOpen(true)} style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 16px", borderRadius: 11, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-2)", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
             <IEye size={16} />
-            Pregledaj
+            Preview
           </button>
-          <button type="button" onClick={onSaveProfile} disabled={isSaving} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 18px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: isSaving ? "default" : "pointer", opacity: isSaving ? 0.7 : 1, boxShadow: "0 8px 18px rgba(37,99,235,.28)" }}>{isSaving ? "Spremam…" : "Spremi profil"}</button>
+          <button type="button" onClick={onSaveProfile} disabled={isSaving} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 18px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: isSaving ? "default" : "pointer", opacity: isSaving ? 0.7 : 1, boxShadow: "0 8px 18px rgba(37,99,235,.28)" }}>{isSaving ? "Spremam…" : "Save profile"}</button>
         </div>
       </header>
 
       <div style={{ maxWidth: 940, margin: "0 auto", padding: "30px 44px 70px", display: "flex", flexDirection: "column", gap: 22 }}>
-        {/* Osobni podaci */}
+        {/* Personal details */}
         <section style={card}>
-          {sectionHead(<IUser size={20} />, "Osobni podaci", "Osnovne informacije o tebi")}
+          {sectionHead(<IUser size={20} />, "Personal details", "Basic information about you")}
           <div style={{ display: "flex", alignItems: "center", gap: 18, marginBottom: 20 }}>
             <div style={{ width: 72, height: 72, flex: "none", borderRadius: "50%", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent-dark))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 24 }}>{initials}</div>
             <button type="button" style={{ padding: "9px 15px", borderRadius: 10, border: "1px dashed #B9C6DC", background: "var(--rh-surface-2)", color: "#3D6CC8", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Upload photo</button>
@@ -868,7 +888,7 @@ export default function DashboardApp({
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(230px,1fr))", gap: 16 }}>
             <div>
               <label style={label}>Full name</label>
-              <input className="rh-field" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="npr. Marko Horvat" style={field} />
+              <input className="rh-field" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="e.g. Alex Morgan" style={field} />
             </div>
             <div>
               <label style={label}>Date of birth</label>
@@ -929,7 +949,7 @@ export default function DashboardApp({
                         color: "var(--rh-text-2)",
                       }}
                       onMouseEnter={(e) => (e.currentTarget.style.background = "#F9FAFB")}
-                      onMouseLeave={(e) => (e.currentTarget.style.background = "#fff")}
+                      onMouseLeave={(e) => (e.currentTarget.style.background = "var(--rh-surface)")}
                     >
                       {city.name}
                     </div>
@@ -946,7 +966,7 @@ export default function DashboardApp({
           <Note ok={!!fullName.trim() && !!dob}>Full name and date of birth are required.</Note>
           <div style={{ marginTop: 16 }}>
             <label style={label}>
-              About you <span style={{ color: "var(--rh-text-3)", fontWeight: 500 }}>— your best qualities and strengths</span>
+              About you <span style={{ color: "var(--rh-text-3)", fontWeight: 500 }}>(your best qualities and strengths)</span>
             </label>
             <textarea className="rh-field" rows={3} value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Reliable and curious… briefly about yourself" style={{ ...field, resize: "vertical", lineHeight: 1.55 }} />
           </div>
@@ -957,153 +977,153 @@ export default function DashboardApp({
           {sectionHead(<IBriefcase size={20} />, "Work experience", "Add your positions and achievements")}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {experiences.length === 0 && (
-              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>Još nema unesenih iskustava.</div>
+              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>No work experience added yet.</div>
             )}
             {experiences.map((exp) => (
               <form key={exp.id} action={updateExperience} style={{ border: "1px solid var(--rh-border)", borderRadius: 16, padding: 18, background: "var(--rh-surface-2)", position: "relative" }}>
                 <input type="hidden" name="id" value={exp.id} />
-                <button type="submit" formAction={deleteExperience} className="rh-del" title="Ukloni" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button type="submit" formAction={deleteExperience} className="rh-del" title="Remove" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <IX />
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14, paddingRight: 34 }}>
                   <div>
-                    <label style={labelSm}>Naziv tvrtke</label>
-                    <input className="rh-field" name="company" defaultValue={exp.company} placeholder="npr. Infobip" style={fieldSm} />
+                    <label style={labelSm}>Company name</label>
+                    <input className="rh-field" name="company" defaultValue={exp.company} placeholder="e.g. Infobip" style={fieldSm} />
                   </div>
                   <div>
-                    <label style={labelSm}>Pozicija</label>
-                    <input className="rh-field" name="position" defaultValue={exp.position} placeholder="npr. Frontend Developer" style={fieldSm} />
+                    <label style={labelSm}>Position</label>
+                    <input className="rh-field" name="position" defaultValue={exp.position} placeholder="e.g. Frontend Developer" style={fieldSm} />
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14 }}>
                   <div>
-                    <label style={labelSm}>Poveznica na tvrtku</label>
+                    <label style={labelSm}>Company website</label>
                     <div className="rh-fieldwrap" style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--rh-border)", borderRadius: 10, background: "var(--rh-surface)", padding: "0 11px" }}>
                       <ISearch size={15} color="var(--rh-text-3)" />
-                      <input name="company_url" defaultValue={exp.company_url} placeholder="npr. infobip.com" style={{ width: "100%", padding: "11px 2px", border: "none", outline: "none", font: "inherit", fontSize: 13.5, color: "var(--rh-accent)", background: "transparent" }} />
+                      <input name="company_url" defaultValue={exp.company_url} placeholder="e.g. infobip.com" style={{ width: "100%", padding: "11px 2px", border: "none", outline: "none", font: "inherit", fontSize: 13.5, color: "var(--rh-accent)", background: "transparent" }} />
                     </div>
                   </div>
                   <div>
-                    <label style={labelSm}>Razdoblje</label>
+                    <label style={labelSm}>Period</label>
                     <PeriodField name="period" defaultValue={exp.period} />
                   </div>
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelSm}>Opis</label>
-                  <textarea className="rh-field" name="description" rows={2} placeholder="Što si radio i postigao na ovoj poziciji…" style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5 }} defaultValue={exp.description} />
+                  <textarea className="rh-field" name="description" rows={2} placeholder="What you did and achieved in this role…" style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5 }} defaultValue={exp.description} />
                 </div>
-                <button type="submit" className="rh-soft" style={saveRowBtn}>Spremi</button>
+                <button type="submit" className="rh-soft" style={saveRowBtn}>Save</button>
               </form>
             ))}
           </div>
           <form action={addExperience}>
             <button type="submit" className="rh-add" style={addBtn}>
               <IPlus />
-              Dodaj iskustvo
+              Add experience
             </button>
           </form>
         </section>
 
-        {/* Obrazovanje */}
+        {/* Education */}
         <section style={card}>
           {sectionHead(<ICap size={20} />, "Education & Courses", "Degrees, courses and certifications")}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {education.length === 0 && (
-              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>Još nema unesenog obrazovanja.</div>
+              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>No education added yet.</div>
             )}
             {education.map((ed) => (
               <form key={ed.id} action={updateEducation} style={{ border: "1px solid var(--rh-border)", borderRadius: 16, padding: 18, background: "var(--rh-surface-2)", position: "relative" }}>
                 <input type="hidden" name="id" value={ed.id} />
-                <button type="submit" formAction={deleteEducation} className="rh-del" title="Ukloni" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button type="submit" formAction={deleteEducation} className="rh-del" title="Remove" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <IX />
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14, paddingRight: 34 }}>
                   <div>
                     <label style={labelSm}>Ustanova</label>
-                    <input className="rh-field" name="institution" defaultValue={ed.institution} placeholder="npr. FER" style={fieldSm} />
+                    <input className="rh-field" name="institution" defaultValue={ed.institution} placeholder="e.g. University of Zagreb" style={fieldSm} />
                   </div>
                   <div>
                     <label style={labelSm}>Titula / zvanje</label>
-                    <input className="rh-field" name="title" defaultValue={ed.title} placeholder="npr. mag. ing." style={fieldSm} />
+                    <input className="rh-field" name="title" defaultValue={ed.title} placeholder="e.g. BSc Computer Science" style={fieldSm} />
                   </div>
                 </div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14 }}>
                   <div>
-                    <label style={labelSm}>Razdoblje</label>
-                    <input className="rh-field" name="period" defaultValue={ed.period} placeholder="npr. 2014 – 2019" style={fieldSm} />
+                    <label style={labelSm}>Period</label>
+                    <input className="rh-field" name="period" defaultValue={ed.period} placeholder="e.g. 2014 to 2019" style={fieldSm} />
                   </div>
                   <div>
-                    <label style={labelSm}>Poveznica (diploma/certifikat)</label>
+                    <label style={labelSm}>Link (diploma or certificate)</label>
                     <div className="rh-fieldwrap" style={{ display: "flex", alignItems: "center", gap: 8, border: "1px solid var(--rh-border)", borderRadius: 10, background: "var(--rh-surface)", padding: "0 11px" }}>
                       <ILink size={15} color="var(--rh-text-3)" />
                       <input name="link" defaultValue={ed.link} placeholder="https://…" style={{ width: "100%", padding: "11px 2px", border: "none", outline: "none", font: "inherit", fontSize: 13.5, color: "var(--rh-accent)", background: "transparent" }} />
                     </div>
                   </div>
                 </div>
-                <button type="submit" className="rh-soft" style={saveRowBtn}>Spremi</button>
+                <button type="submit" className="rh-soft" style={saveRowBtn}>Save</button>
               </form>
             ))}
           </div>
           <form action={addEducation}>
             <button type="submit" className="rh-add" style={{ ...addBtn, marginTop: 15 }}>
               <IPlus />
-              Dodaj obrazovanje ili tečaj
+              Add education or a course
             </button>
           </form>
         </section>
 
         {/* Projects */}
         <section style={card}>
-          {sectionHead(<IFolder size={20} />, "Projects", "Personal or professional projects — with links")}
+          {sectionHead(<IFolder size={20} />, "Projects", "Personal or professional projects, with links")}
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             {projects.length === 0 && (
-              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>Još nema unesenih projekata.</div>
+              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", padding: "4px 2px" }}>No projects added yet.</div>
             )}
             {projects.map((p) => (
               <form key={p.id} action={updateProject} style={{ border: "1px solid var(--rh-border)", borderRadius: 16, padding: 18, background: "var(--rh-surface-2)", position: "relative" }}>
                 <input type="hidden" name="id" value={p.id} />
-                <button type="submit" formAction={deleteProject} className="rh-del" title="Ukloni" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <button type="submit" formAction={deleteProject} className="rh-del" title="Remove" style={{ position: "absolute", top: 13, right: 13, width: 30, height: 30, borderRadius: 9, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-4)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <IX />
                 </button>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 14, marginBottom: 14, paddingRight: 34 }}>
                   <div>
-                    <label style={labelSm}>Naziv projekta</label>
-                    <input className="rh-field" name="name" defaultValue={p.name} placeholder="npr. Resume Hunter" style={fieldSm} />
+                    <label style={labelSm}>Project name</label>
+                    <input className="rh-field" name="name" defaultValue={p.name} placeholder="e.g. Resume Hunter" style={fieldSm} />
                   </div>
                   <div>
                     <label style={labelSm}>Vrijeme izrade</label>
-                    <input className="rh-field" name="period" defaultValue={p.period} placeholder="npr. 2024 ili 3/2024 – 6/2024" style={fieldSm} />
+                    <input className="rh-field" name="period" defaultValue={p.period} placeholder="e.g. 2024 or 3/2024 to 6/2024" style={fieldSm} />
                   </div>
                 </div>
                 <div style={{ marginBottom: 14 }}>
                   <label style={labelSm}>Opis</label>
-                  <textarea className="rh-field" name="description" rows={2} placeholder="Što projekt radi, tvoja uloga, tehnologije…" style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5 }} defaultValue={p.description} />
+                  <textarea className="rh-field" name="description" rows={2} placeholder="What the project does, your role, technologies…" style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5 }} defaultValue={p.description} />
                 </div>
                 <div style={{ marginBottom: 14 }}>
-                  <label style={labelSm}>Poveznice <span style={{ color: "var(--rh-text-3)", fontWeight: 500 }}>— jedna po retku</span></label>
+                  <label style={labelSm}>Poveznice <span style={{ color: "var(--rh-text-3)", fontWeight: 500 }}>, jedna po retku</span></label>
                   <textarea className="rh-field" name="links" rows={2} placeholder={"https://github.com/…\nhttps://demo.example.com"} style={{ ...fieldSm, resize: "vertical", lineHeight: 1.5, color: "var(--rh-accent)" }} defaultValue={(p.links || []).join("\n")} />
                 </div>
-                <button type="submit" className="rh-soft" style={saveRowBtn}>Spremi</button>
+                <button type="submit" className="rh-soft" style={saveRowBtn}>Save</button>
               </form>
             ))}
           </div>
           <form action={addProject}>
             <button type="submit" className="rh-add" style={addBtn}>
               <IPlus />
-              Dodaj projekt
+              Add project
             </button>
           </form>
         </section>
 
         {/* Skills */}
         <section style={card}>
-          {sectionHead(<IStar size={20} />, "Skills", "Select suggested or add your own — organized by category")}
+          {sectionHead(<IStar size={20} />, "Skills", "Select suggested or add your own, organized by category")}
           <div style={{ marginBottom: 14 }}>
-            <Note ok={skills.some((c) => c.items.length > 0)}>Dodaj barem jednu kategoriju s barem jednom vještinom.</Note>
+            <Note ok={skills.some((c) => c.items.length > 0)}>Add at least one category with at least one skill.</Note>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
             {skills.length === 0 && (
-              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", marginBottom: 4 }}>Još nema kategorija — dodaj jednu ispod.</div>
+              <div style={{ fontSize: 13.5, color: "var(--rh-text-3)", marginBottom: 4 }}>No categories yet, add one below.</div>
             )}
             {skills.map((cat, ci) => {
               const suggestions = (SKILL_SUGGESTIONS[cat.name] || []).filter((s) => !cat.items.includes(s));
@@ -1111,7 +1131,7 @@ export default function DashboardApp({
                 <div key={cat.name} style={{ borderTop: ci ? "1px solid var(--rh-surface-3)" : "none", paddingTop: ci ? 18 : 0, paddingBottom: 18 }}>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 11 }}>
                     <div style={{ ...catTitle, marginBottom: 0 }}>{cat.name}</div>
-                    <button type="button" onClick={() => removeCategory(ci)} title="Ukloni kategoriju" className="rh-del" style={catRemoveBtn}>
+                    <button type="button" onClick={() => removeCategory(ci)} title="Remove category" className="rh-del" style={catRemoveBtn}>
                       <IX size={12} w={2.3} />
                     </button>
                   </div>
@@ -1119,16 +1139,16 @@ export default function DashboardApp({
                     {cat.items.map((item, ii) => (
                       <span key={`${item}-${ii}`} style={chip}>
                         {item}
-                        <button type="button" onClick={() => removeSkill(ci, ii)} title="Ukloni" style={chipX}>
+                        <button type="button" onClick={() => removeSkill(ci, ii)} title="Remove" style={chipX}>
                           <IX size={11} w={2.4} />
                         </button>
                       </span>
                     ))}
-                    <ChipAdder placeholder="Dodaj vještinu…" onAdd={(v) => addSkillValue(ci, v)} />
+                    <ChipAdder placeholder="Add a skill…" onAdd={(v) => addSkillValue(ci, v)} />
                   </div>
                   {suggestions.length > 0 && (
                     <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
-                      <span style={suggLabel}>Predloženo:</span>
+                      <span style={suggLabel}>Suggested:</span>
                       {suggestions.map((sg) => (
                         <button type="button" key={sg} onClick={() => addSkillValue(ci, sg)} style={suggChip}>+ {sg}</button>
                       ))}
@@ -1139,36 +1159,36 @@ export default function DashboardApp({
             })}
           </div>
 
-          {/* Dodaj kategoriju */}
+          {/* Add category */}
           <div style={{ marginTop: skills.length ? 4 : 12, paddingTop: 18, borderTop: "1px solid var(--rh-surface-3)" }}>
-            <div style={{ ...catTitle, color: "var(--rh-text-2)" }}>Dodaj kategoriju</div>
+            <div style={{ ...catTitle, color: "var(--rh-text-2)" }}>Add category</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
               {SKILL_CATEGORY_TEMPLATES.filter((t) => !skills.some((c) => c.name === t)).map((t) => (
                 <button type="button" key={t} onClick={() => addCategory(t)} style={suggChip}>+ {t}</button>
               ))}
-              <ChipAdder placeholder="Nova kategorija…" onAdd={addCategory} />
+              <ChipAdder placeholder="New category…" onAdd={addCategory} />
             </div>
           </div>
         </section>
 
-        {/* Hobiji */}
+        {/* Hobbies */}
         <section style={card}>
-          {sectionHead(<IHeart size={20} />, "Hobiji", "Odaberi predložene ili dodaj svoje")}
+          {sectionHead(<IHeart size={20} />, "Hobbies", "Pick from suggestions or add your own")}
           <div style={{ marginBottom: 14 }}>
-            <Note ok={hobbies.length >= 3}>Odaberi barem 3 hobija (trenutno {hobbies.length}).</Note>
+            <Note ok={hobbies.length >= 3}>Pick at least 3 hobbies (currently {hobbies.length}).</Note>
           </div>
           {/* odabrani */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 9, marginBottom: 18 }}>
-            {hobbies.length === 0 && <span style={{ fontSize: 13, color: "var(--rh-text-3)" }}>Još nema odabranih hobija — klikni predložene ispod ili dodaj svoj.</span>}
+            {hobbies.length === 0 && <span style={{ fontSize: 13, color: "var(--rh-text-3)" }}>No hobbies selected yet. Click a suggestion below or add your own.</span>}
             {hobbies.map((h, i) => (
               <span key={`${h}-${i}`} style={chip}>
                 {h}
-                <button type="button" onClick={() => removeHobby(i)} title="Ukloni" style={chipX}>
+                <button type="button" onClick={() => removeHobby(i)} title="Remove" style={chipX}>
                   <IX size={11} w={2.4} />
                 </button>
               </span>
             ))}
-            <ChipAdder placeholder="Dodaj hobi…" onAdd={addHobbyValue} />
+            <ChipAdder placeholder="Add a hobby…" onAdd={addHobbyValue} />
           </div>
           {/* predlošci po kategorijama */}
           <div style={{ display: "flex", flexDirection: "column", gap: 16, borderTop: "1px solid var(--rh-surface-3)", paddingTop: 18 }}>
@@ -1198,12 +1218,12 @@ export default function DashboardApp({
             {certificates.map((c, i) => (
               <span key={`${c}-${i}`} style={chip}>
                 {c}
-                <button type="button" onClick={() => removeCertificate(i)} title="Ukloni" style={chipX}>
+                <button type="button" onClick={() => removeCertificate(i)} title="Remove" style={chipX}>
                   <IX size={11} w={2.4} />
                 </button>
               </span>
             ))}
-            <ChipAdder placeholder="npr. Azure AI Fundamentals (Microsoft)" onAdd={addCertificate} />
+            <ChipAdder placeholder="e.g. Azure AI Fundamentals (Microsoft)" onAdd={addCertificate} />
           </div>
         </section>
 
@@ -1214,18 +1234,18 @@ export default function DashboardApp({
             {strengths.map((s, i) => (
               <span key={`${s}-${i}`} style={chip}>
                 {s}
-                <button type="button" onClick={() => removeStrength(i)} title="Ukloni" style={chipX}>
+                <button type="button" onClick={() => removeStrength(i)} title="Remove" style={chipX}>
                   <IX size={11} w={2.4} />
                 </button>
               </span>
             ))}
-            <ChipAdder placeholder="npr. Pažnja na detalje" onAdd={addStrength} />
+            <ChipAdder placeholder="e.g. Attention to detail" onAdd={addStrength} />
           </div>
         </section>
 
         {/* Ton */}
         <section style={card}>
-          {sectionHead(<IChat size={20} />, "Zadani ton", "Kako želiš zvučati u svojim prijavama")}
+          {sectionHead(<IChat size={20} />, "Default tone", "How you want to sound in your applications")}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(165px,1fr))", gap: 12 }}>
             {TONES.map((t) => {
               const active = selectedTone === t.name;
@@ -1246,7 +1266,7 @@ export default function DashboardApp({
                     fontFamily: "inherit",
                     transition: "all .15s",
                     border: active ? "1.5px solid var(--rh-accent)" : "1.5px solid var(--rh-border)",
-                    background: active ? "linear-gradient(150deg,var(--rh-accent-soft),var(--rh-accent-soft-2))" : "#fff",
+                    background: active ? "linear-gradient(150deg,var(--rh-accent-soft),var(--rh-accent-soft-2))" : "var(--rh-surface)",
                     color: active ? "var(--rh-accent-text)" : "var(--rh-text)",
                     boxShadow: active ? "0 6px 16px rgba(37,99,235,.16)" : "none",
                   }}
@@ -1257,7 +1277,7 @@ export default function DashboardApp({
               );
             })}
           </div>
-          <p style={{ margin: "16px 0 0", fontSize: 12, color: "var(--rh-text-3)" }}>Promjene u vještinama, hobijima i tonu spremaju se klikom na „Spremi profil”.</p>
+          <p style={{ margin: "16px 0 0", fontSize: 12, color: "var(--rh-text-3)" }}>Changes to skills, hobbies and tone are saved when you click Save profile.</p>
         </section>
       </div>
     </div>
@@ -1266,17 +1286,17 @@ export default function DashboardApp({
   /* ===================== Screen: Hunter ===================== */
   const hunterScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "color-mix(in srgb, var(--rh-bg) 82%, transparent)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em", display: "flex", alignItems: "center", gap: 10 }}>
             Hunter Agent <span style={{ fontSize: 10.5, fontWeight: 800, color: "var(--rh-accent)", background: "var(--rh-accent-soft)", padding: "3px 8px", borderRadius: 6, letterSpacing: ".04em" }}>AI</span>
           </h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Zalijepi oglas, odaberi ton — dobiješ prilagođeni životopis i pismo.</p>
+          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Paste an ad, pick a tone, get a tailored resume and cover letter.</p>
         </div>
         {hunterStep === "result" && (
           <button type="button" onClick={resetHunter} style={{ display: "flex", alignItems: "center", gap: 7, padding: "11px 16px", borderRadius: 11, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-2)", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer" }}>
             <IRefresh />
-            Nova prijava
+            New application
           </button>
         )}
       </header>
@@ -1289,11 +1309,57 @@ export default function DashboardApp({
             </div>
             <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: "6px 18px 18px 18px", padding: "18px 20px", boxShadow: "0 1px 2px rgba(var(--rh-shadow-rgb),.06)" }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: "var(--rh-accent)", letterSpacing: ".03em", marginBottom: 6 }}>HUNTER AGENT</div>
-              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "var(--rh-text-2)" }}>Bok {displayName.split(" ")[0]} — spreman sam pronaći tvoju sljedeću priliku. Zalijepi tekst oglasa na koji se želiš prijaviti, a ja ću usporediti tvoj profil s onim što traže i napisati prilagođen životopis i motivacijsko pismo.</p>
+              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "var(--rh-text-2)" }}>
+                {hunterMode === "generate"
+                  ? `Hi ${displayName.split(" ")[0]}, ready to find your next opportunity. Paste the job ad you want to apply for and I'll compare it with your profile, then write a tailored resume and cover letter.`
+                  : `Hi ${displayName.split(" ")[0]}, ask me anything about your resume, cover letters or job hunting. I answer from what's in your profile, so keep it up to date.`}
+              </p>
             </div>
           </div>
 
-          {/* Provjera profila — deterministička, prije generiranja */}
+          {/* Odabir načina rada */}
+          <div style={{ display: "flex", gap: 8, marginBottom: 18, background: "var(--rh-surface-3)", padding: 5, borderRadius: 14, border: "1px solid var(--rh-border)" }}>
+            {([
+              { key: "generate" as const, label: "Generate from job ad", icon: <ISparkles size={16} />, hint: "Paste an ad, get a resume and cover letter" },
+              { key: "chat" as const, label: "Chat with Hunter", icon: <IChat size={16} />, hint: "Ask questions about your application" },
+            ]).map((m) => {
+              const active = hunterMode === m.key;
+              return (
+                <button
+                  key={m.key}
+                  type="button"
+                  onClick={() => setHunterMode(m.key)}
+                  title={m.hint}
+                  style={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 8,
+                    padding: "11px 14px",
+                    borderRadius: 10,
+                    border: active ? "1px solid var(--rh-accent)" : "1px solid transparent",
+                    background: active ? "var(--rh-surface)" : "transparent",
+                    color: active ? "var(--rh-accent)" : "var(--rh-text-2)",
+                    font: "inherit",
+                    fontSize: 13.5,
+                    fontWeight: active ? 800 : 600,
+                    cursor: "pointer",
+                    boxShadow: active ? "0 2px 8px rgba(var(--rh-shadow-rgb),.14)" : "none",
+                  }}
+                >
+                  {m.icon}
+                  {m.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {hunterMode === "chat" ? (
+            <HunterChat firstName={displayName.split(" ")[0]} />
+          ) : (
+          <>
+          {/* Provjera profila, deterministička, prije generiranja */}
           <div
             style={{
               background: "var(--rh-surface)",
@@ -1316,14 +1382,14 @@ export default function DashboardApp({
               </span>
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: "var(--rh-text)" }}>
-                  {readinessOk ? "Profil je spreman za Hunter" : "Profilu nedostaju osnovni podaci"}
+                  {readinessOk ? "Your profile is ready for Hunter" : "Your profile is missing basic details"}
                 </div>
                 <div style={{ fontSize: 12.5, color: "var(--rh-text-3)", marginTop: 2 }}>
                   {readinessOk
                     ? readinessOptional.length
                       ? `Sve nužno je tu. Još ${readinessOptional.length} stvari mogu poboljšati rezultat.`
-                      : "Svi podaci su popunjeni."
-                    : "Hunter piše samo iz onoga što si unio — bez toga ne može sastaviti životopis."}
+                      : "Everything is filled in."
+                    : "Hunter writes only from what you entered. Without it there is nothing to build a resume from."}
                 </div>
               </div>
               {(readinessBlocking.length > 0 || readinessOptional.length > 0) && (
@@ -1332,7 +1398,7 @@ export default function DashboardApp({
                   onClick={() => go("profile")}
                   style={{ marginLeft: "auto", flex: "none", padding: "8px 14px", borderRadius: 10, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-accent)", font: "inherit", fontSize: 12.5, fontWeight: 700, cursor: "pointer" }}
                 >
-                  Dopuni profil
+                  Complete profile
                 </button>
               )}
             </div>
@@ -1340,30 +1406,30 @@ export default function DashboardApp({
             {readinessBlocking.map((c) => (
               <div key={c.label} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "7px 0", fontSize: 13, color: "var(--rh-text-2)" }}>
                 <span style={{ color: "var(--rh-warn)", fontWeight: 800, lineHeight: 1.5 }}>!</span>
-                <span><strong>{c.label}</strong> — {c.fix}</span>
+                <span><strong>{c.label}</strong>: {c.fix}</span>
               </div>
             ))}
             {readinessOptional.map((c) => (
               <div key={c.label} style={{ display: "flex", gap: 9, alignItems: "flex-start", padding: "7px 0", fontSize: 13, color: "var(--rh-text-3)" }}>
                 <span style={{ color: "var(--rh-text-4)", fontWeight: 800, lineHeight: 1.5 }}>·</span>
-                <span>{c.label} — {c.fix}</span>
+                <span>{c.label}: {c.fix}</span>
               </div>
             ))}
           </div>
 
           <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 20, padding: 24, boxShadow: "0 2px 8px rgba(var(--rh-shadow-rgb),.06)" }}>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--rh-text-2)", marginBottom: 10 }}>Oglas za posao</label>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--rh-text-2)", marginBottom: 10 }}>Job ad</label>
             <div className="rh-fieldwrap" style={{ border: "1px solid var(--rh-border)", borderRadius: 13, background: "var(--rh-surface-2)", padding: 6 }}>
-              <textarea value={jobText} onChange={(e) => setJobText(e.target.value)} rows={6} placeholder={"Zalijepi tekst oglasa, npr.:\n\nFrontend Developer (m/ž) — Infobip, Zagreb\nTražimo iskusnog frontend developera s React i TypeScript iskustvom…"} style={{ width: "100%", padding: "10px 12px", border: "none", outline: "none", font: "inherit", fontSize: 14, color: "var(--rh-text)", background: "transparent", resize: "vertical", lineHeight: 1.7 }} />
+              <textarea value={jobText} onChange={(e) => setJobText(e.target.value)} rows={6} placeholder={"Paste the job ad text, e.g.:\n\nFrontend Developer, Infobip, Zagreb\nWe are looking for an experienced frontend developer with React and TypeScript…"} style={{ width: "100%", padding: "10px 12px", border: "none", outline: "none", font: "inherit", fontSize: 14, color: "var(--rh-text)", background: "transparent", resize: "vertical", lineHeight: 1.7 }} />
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 10, fontSize: 12.5, color: "var(--rh-text-3)" }}>
               <IInfo />
-              Zalijepi cijeli opis posla za najbolji rezultat (ne samo poveznicu).
+              Paste the full job description for the best result, not just a link.
             </div>
 
             <div style={{ height: 1, background: "var(--rh-border-soft)", margin: "22px 0" }} />
 
-            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--rh-text-2)", marginBottom: 12 }}>Ton za ovu prijavu</label>
+            <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--rh-text-2)", marginBottom: 12 }}>Tone for this application</label>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
               {TONES.map((t) => {
                 const active = hunterTone === t.name;
@@ -1381,7 +1447,7 @@ export default function DashboardApp({
                       fontWeight: 700,
                       transition: "all .15s",
                       border: active ? "1.5px solid var(--rh-accent)" : "1.5px solid var(--rh-border)",
-                      background: active ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))" : "#fff",
+                      background: active ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))" : "var(--rh-surface)",
                       color: active ? "#fff" : "var(--rh-text-2)",
                       boxShadow: active ? "0 6px 14px rgba(37,99,235,.25)" : "none",
                     }}
@@ -1396,25 +1462,22 @@ export default function DashboardApp({
               type="button"
               onClick={() => {
                 if (!readinessOk) {
-                  showToast("Dopuni obavezne podatke u profilu");
+                  showToast("Fill in the required profile details");
                   go("profile");
                   return;
                 }
                 generate();
               }}
               className="rh-soft"
-              title={readinessOk ? undefined : "Profilu nedostaju osnovni podaci"}
+              title={readinessOk ? undefined : "Your profile is missing basic details"}
               style={{ marginTop: 24, width: "100%", padding: 15, borderRadius: 13, border: "none", background: readinessOk ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))" : "var(--rh-text-4)", color: "#fff", font: "inherit", fontSize: 15, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 9, boxShadow: readinessOk ? "0 10px 22px rgba(37,99,235,.3)" : "none" }}
             >
               <ISparkles />
-              {readinessOk ? "Generiraj s Hunter Agentom" : "Dopuni profil za generiranje"}
+              {readinessOk ? "Generate with Hunter Agent" : "Complete your profile to generate"}
             </button>
           </div>
-
-          {/* Razgovor s Hunterom */}
-          <div style={{ marginTop: 20 }}>
-            <HunterChat firstName={displayName.split(" ")[0]} />
-          </div>
+          </>
+          )}
         </div>
       )}
 
@@ -1425,8 +1488,8 @@ export default function DashboardApp({
               <div style={{ position: "absolute", inset: -6, borderRadius: 24, border: "2px solid var(--rh-accent-soft-2)", borderTopColor: "transparent", animation: "rh-spin 1s linear infinite" }} />
               <ISearch size={34} color="#fff" />
             </div>
-            <h2 style={{ margin: "22px 0 6px", fontSize: 20, fontWeight: 800, color: "var(--rh-text)" }}>Hunter radi na tvojoj prijavi…</h2>
-            <p style={{ margin: 0, fontSize: 14, color: "var(--rh-text-3)" }}>Ovo obično traje nekoliko sekundi.</p>
+            <h2 style={{ margin: "22px 0 6px", fontSize: 20, fontWeight: 800, color: "var(--rh-text)" }}>Hunter is working on your application…</h2>
+            <p style={{ margin: 0, fontSize: 14, color: "var(--rh-text-3)" }}>This usually takes a few seconds.</p>
           </div>
           <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 18, padding: "14px 10px", boxShadow: "0 2px 8px rgba(var(--rh-shadow-rgb),.06)" }}>
             {WORK.map((labelText, i) => {
@@ -1455,11 +1518,11 @@ export default function DashboardApp({
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14.5, fontWeight: 800, color: hunterResult.saveError ? "#8A5A00" : "#0E6B3D" }}>{hunterResult.saveError ? "Generated (save failed)" : "Ready and saved to Dashboard!"}</div>
               <div style={{ fontSize: 12.5, color: hunterResult.saveError ? "#9A6B18" : "#3E9468" }}>
-                Prilagođeno za <strong>{[hunterResult.parsedJob?.company, hunterResult.parsedJob?.position].filter(Boolean).join(" · ") || "posao"}</strong> · ton: {hunterTone}
+                Tailored for <strong>{[hunterResult.parsedJob?.company, hunterResult.parsedJob?.position].filter(Boolean).join(" · ") || "posao"}</strong> · ton: {hunterTone}
                 {hunterResult.matchScore != null ? ` · ${hunterResult.matchScore}% podudaranje` : ""}
               </div>
             </div>
-            <button type="button" onClick={resetHunter} className="rh-soft" style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Nova prijava</button>
+            <button type="button" onClick={resetHunter} className="rh-soft" style={{ padding: "10px 16px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>New application</button>
           </div>
 
           {/* skill gaps */}
@@ -1496,31 +1559,31 @@ export default function DashboardApp({
           )}
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(380px,1fr))", gap: 22 }}>
-            {/* Životopis — live PDF pregled (skica) */}
+            {/* Životopis, live PDF pregled (skica) */}
             <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 20, boxShadow: "0 2px 10px rgba(var(--rh-shadow-rgb),.06)", overflow: "hidden" }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--rh-border-soft)", background: "var(--rh-surface-2)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ ...secIcon, width: 34, height: 34, borderRadius: 10 }}><IFile /></div>
                   <span style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)" }}>Resume (PDF)</span>
                 </div>
-                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori / Preuzmi PDF" className="rh-icon" style={iconBtn}><IDownload /></a>
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Open / Download PDF" className="rh-icon" style={iconBtn}><IDownload /></a>
               </div>
               <div style={{ position: "relative", height: 420, overflow: "hidden", background: "var(--rh-surface)", borderBottom: "1px solid var(--rh-border-soft)" }}>
                 <iframe
-                  title="Pregled životopisa"
+                  title="Resume preview"
                   src={`/dashboard/cv?embed=1${hunterResult.applicationId ? `&app=${hunterResult.applicationId}` : ""}`}
                   sandbox="allow-same-origin allow-scripts"
                   style={{ width: 1080, height: 1320, border: "none", transform: "scale(0.53)", transformOrigin: "top left", pointerEvents: "none", background: "var(--rh-surface)" }}
                 />
                 {/* klik bilo gdje po pregledu otvara puni CV */}
-                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Otvori CV (PDF)" style={{ position: "absolute", inset: 0 }} />
+                <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" title="Open CV (PDF)" style={{ position: "absolute", inset: 0 }} />
               </div>
               <div style={{ display: "flex", justifyContent: "center", gap: 10, padding: "14px 20px", background: "var(--rh-surface-2)" }}>
                 <a href={hunterResult.applicationId ? `/dashboard/cv/edit?app=${hunterResult.applicationId}` : "#"} className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 11, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-accent)", fontSize: 13.5, fontWeight: 700, textDecoration: "none", cursor: hunterResult.applicationId ? "pointer" : "not-allowed", opacity: hunterResult.applicationId ? 1 : 0.5 }}>
                   ✏️ Uredi
                 </a>
                 <a href={hunterResult.applicationId ? `/dashboard/cv?app=${hunterResult.applicationId}` : "/dashboard/cv"} target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 8, padding: "10px 16px", borderRadius: 11, background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", fontSize: 13.5, fontWeight: 700, textDecoration: "none", boxShadow: "0 8px 18px rgba(37,99,235,.3)" }}>
-                  <IEye size={16} /> Preuzmi PDF
+                  <IEye size={16} /> Download PDF
                 </a>
               </div>
             </div>
@@ -1530,11 +1593,11 @@ export default function DashboardApp({
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: "1px solid var(--rh-border-soft)", background: "var(--rh-surface-2)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <div style={{ ...secIcon, width: 34, height: 34, borderRadius: 10 }}><IMail /></div>
-                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)" }}>Motivacijsko pismo</span>
+                  <span style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)" }}>Cover letter</span>
                 </div>
-                <button type="button" onClick={copyCover} title="Kopiraj" className="rh-icon" style={iconBtn}><ICopy /></button>
+                <button type="button" onClick={copyCover} title="Copy" className="rh-icon" style={iconBtn}><ICopy /></button>
               </div>
-              <div style={{ padding: "24px 26px", maxHeight: 560, overflow: "auto", fontSize: 13.5, lineHeight: 1.75, color: "var(--rh-text-2)", whiteSpace: "pre-wrap" }}>{hunterResult.coverLetter || "—"}</div>
+              <div style={{ padding: "24px 26px", maxHeight: 560, overflow: "auto", fontSize: 13.5, lineHeight: 1.75, color: "var(--rh-text-2)", whiteSpace: "pre-wrap" }}>{hunterResult.coverLetter || ","}</div>
             </div>
           </div>
         </div>
@@ -1565,10 +1628,10 @@ export default function DashboardApp({
 
   const dashboardScreen = (
     <div>
-      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(246,247,250,.72)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <header style={{ position: "sticky", top: 0, zIndex: 4, background: "color-mix(in srgb, var(--rh-bg) 82%, transparent)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid rgba(var(--rh-shadow-rgb),.06)", padding: "20px 44px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em" }}>Dashboard</h1>
-          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Svi tvoji generirani životopisi i motivacijska pisma.</p>
+          <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>All the resumes and cover letters you have generated.</p>
         </div>
         <button type="button" onClick={newWithHunter} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 18px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 13.5, fontWeight: 700, cursor: "pointer", boxShadow: "0 8px 18px rgba(37,99,235,.28)" }}>
           <IPlus w={2.2} />
@@ -1582,13 +1645,13 @@ export default function DashboardApp({
             <div style={{ width: 66, height: 66, flex: "none", borderRadius: 18, background: "var(--rh-accent-soft)", color: "var(--rh-accent)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
               <IGrid size={30} />
             </div>
-            <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "var(--rh-text)" }}>Još nemaš spremljenih prijava</h2>
+            <h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "var(--rh-text)" }}>You have no saved applications yet</h2>
             <p style={{ margin: "9px 0 24px", fontSize: 14, color: "var(--rh-text-3)", maxWidth: 440, lineHeight: 1.6 }}>
-              Kad s Hunter Agentom generiraš životopis i motivacijsko pismo, pojavit će se ovdje — sa statistikama i pregledom svih prijava.
+              Once you generate a resume and cover letter with Hunter Agent, it will show up here with stats and an overview of every application.
             </p>
             <button type="button" onClick={newWithHunter} className="rh-soft" style={{ display: "flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 10px 22px rgba(37,99,235,.3)" }}>
               <IPlus w={2.2} />
-              Generiraj prvu prijavu
+              Generate your first application
             </button>
           </div>
         ) : (
@@ -1596,10 +1659,10 @@ export default function DashboardApp({
             {/* statistika */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(190px,1fr))", gap: 16, marginBottom: 24 }}>
               {[
-                { l: "Ukupno prijava", v: String(totalApps), c: "var(--rh-text)" },
-                { l: "Ovaj tjedan", v: String(weekApps), c: "var(--rh-text)" },
-                { l: "Pozvan na razgovor", v: String(interviewApps), c: "var(--rh-success)" },
-                { l: "Stopa odgovora", v: `${responseRate}%`, c: "var(--rh-text)" },
+                { l: "Total applications", v: String(totalApps), c: "var(--rh-text)" },
+                { l: "This week", v: String(weekApps), c: "var(--rh-text)" },
+                { l: "Interviews", v: String(interviewApps), c: "var(--rh-success)" },
+                { l: "Response rate", v: `${responseRate}%`, c: "var(--rh-text)" },
               ].map((s) => (
                 <div key={s.l} style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 16, padding: "18px 20px", boxShadow: "0 1px 2px rgba(var(--rh-shadow-rgb),.06)" }}>
                   <div style={{ fontSize: 12.5, fontWeight: 600, color: "var(--rh-text-3)" }}>{s.l}</div>
@@ -1610,10 +1673,10 @@ export default function DashboardApp({
 
             {/* filteri */}
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
-              {([["all", "Sve"], ["week", "Ovaj tjedan"], ["interview", "Razgovor"]] as const).map(([key, label]) => {
+              {([["all", "Sve"], ["week", "This week"], ["interview", "Interview"]] as const).map(([key, label]) => {
                 const active = dashFilter === key;
                 return (
-                  <button key={key} type="button" onClick={() => setDashFilter(key)} style={{ padding: "8px 15px", borderRadius: 999, border: active ? "none" : "1px solid var(--rh-border)", background: active ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))" : "#fff", color: active ? "#fff" : "var(--rh-text-2)", font: "inherit", fontSize: 13, fontWeight: active ? 700 : 600, cursor: "pointer" }}>
+                  <button key={key} type="button" onClick={() => setDashFilter(key)} style={{ padding: "8px 15px", borderRadius: 999, border: active ? "none" : "1px solid var(--rh-border)", background: active ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))" : "var(--rh-surface)", color: active ? "#fff" : "var(--rh-text-2)", font: "inherit", fontSize: 13, fontWeight: active ? 700 : 600, cursor: "pointer" }}>
                     {label}
                   </button>
                 );
@@ -1622,7 +1685,7 @@ export default function DashboardApp({
 
             {/* kartice */}
             {filteredApps.length === 0 ? (
-              <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 16, padding: 40, textAlign: "center", fontSize: 14, color: "var(--rh-text-3)" }}>Nema prijava za ovaj filter.</div>
+              <div style={{ background: "var(--rh-surface)", border: "1px solid var(--rh-border)", borderRadius: 16, padding: 40, textAlign: "center", fontSize: 14, color: "var(--rh-text-3)" }}>No applications match this filter.</div>
             ) : (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(330px,1fr))", gap: 18 }}>
                 {filteredApps.map((app) => {
@@ -1633,8 +1696,8 @@ export default function DashboardApp({
                       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                         <div style={{ width: 44, height: 44, flex: "none", borderRadius: 13, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: 15, color: "#fff", background: tint }}>{cardInitials}</div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.company || "—"}</div>
-                          <div style={{ fontSize: 12.5, color: "var(--rh-text-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.role_title || "—"}</div>
+                          <div style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.company || ","}</div>
+                          <div style={{ fontSize: 12.5, color: "var(--rh-text-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{app.role_title || ","}</div>
                         </div>
                         {app.match_score != null && (
                           <span style={{ padding: "4px 9px", flex: "none", borderRadius: 999, fontSize: 11.5, fontWeight: 800, background: "var(--rh-success-soft)", color: "var(--rh-success)" }}>{app.match_score}%</span>
@@ -1655,11 +1718,11 @@ export default function DashboardApp({
                       <div style={{ display: "flex", gap: 7, marginTop: "auto", paddingTop: 14, borderTop: "1px solid var(--rh-surface-3)" }}>
                         <button type="button" onClick={() => openApplication(app)} className="rh-soft" style={{ flex: 1, padding: 9, borderRadius: 9, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", font: "inherit", fontSize: 12.5, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
                           <IEye />
-                          Otvori
+                          Open
                         </button>
                         <form action={deleteApplication}>
                           <input type="hidden" name="id" value={app.id} />
-                          <button type="submit" title="Obriši" className="rh-icon rh-del" style={{ ...iconBtn, width: 38 }}><IX size={15} /></button>
+                          <button type="submit" title="Delete" className="rh-icon rh-del" style={{ ...iconBtn, width: 38 }}><IX size={15} /></button>
                         </form>
                       </div>
                     </div>
@@ -1673,22 +1736,22 @@ export default function DashboardApp({
     </div>
   );
 
-  /* ===================== Screen: Postavke ===================== */
+  /* ===================== Screen: Settings ===================== */
   const settingsScreen = (
     <div>
       <header style={{ position: "sticky", top: 0, zIndex: 4, background: "rgba(var(--rh-shadow-rgb),.02)", backdropFilter: "saturate(160%) blur(16px)", WebkitBackdropFilter: "saturate(160%) blur(16px)", borderBottom: "1px solid var(--rh-border)", padding: "20px 44px" }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em" }}>Postavke</h1>
-        <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Izgled aplikacije i upravljanje računom.</p>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "var(--rh-text)", letterSpacing: "-.01em" }}>Settings</h1>
+        <p style={{ margin: "4px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Appearance aplikacije i upravljanje računom.</p>
       </header>
 
       <div style={{ maxWidth: 820, margin: "0 auto", padding: "30px 44px 70px", display: "flex", flexDirection: "column", gap: 22 }}>
-        {/* Izgled */}
+        {/* Appearance */}
         <section style={card}>
-          {sectionHead(<IMoon size={20} />, "Izgled", "Odaberi svijetlu ili tamnu temu")}
+          {sectionHead(<IMoon size={20} />, "Appearance", "Choose a light or dark theme")}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 14 }}>
             {([
-              { key: "light" as const, label: "Svijetla", desc: "Klasičan, svijetli prikaz", icon: <ISun size={18} /> },
-              { key: "dark" as const, label: "Tamna", desc: "Lakše za oči po noći", icon: <IMoon size={18} /> },
+              { key: "light" as const, label: "Svijetla", desc: "Classic bright view", icon: <ISun size={18} /> },
+              { key: "dark" as const, label: "Tamna", desc: "Easier on the eyes at night", icon: <IMoon size={18} /> },
             ]).map((opt) => {
               const active = theme === opt.key;
               return (
@@ -1725,9 +1788,9 @@ export default function DashboardApp({
           </div>
         </section>
 
-        {/* Račun */}
+        {/* Account */}
         <section style={card}>
-          {sectionHead(<IShield size={20} />, "Račun", "Podaci tvog računa")}
+          {sectionHead(<IShield size={20} />, "Account", "Your account details")}
           <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", borderRadius: 12, background: "var(--rh-surface-2)", border: "1px solid var(--rh-border)" }}>
             <div style={{ width: 38, height: 38, flex: "none", borderRadius: "50%", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent-dark))", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: 14 }}>{initials}</div>
             <div style={{ minWidth: 0 }}>
@@ -1736,7 +1799,7 @@ export default function DashboardApp({
             </div>
             <form action={logout} style={{ marginLeft: "auto" }}>
               <button type="submit" style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 15px", borderRadius: 10, border: "1px solid var(--rh-border)", background: "var(--rh-surface)", color: "var(--rh-text-2)", font: "inherit", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>
-                <ILogout size={15} /> Odjava
+                <ILogout size={15} /> Log out
               </button>
             </form>
           </div>
@@ -1744,14 +1807,14 @@ export default function DashboardApp({
 
         {/* Opasna zona */}
         <section style={{ ...card, border: "1px solid var(--rh-danger)" }}>
-          {sectionHead(<ITrash size={20} />, "Brisanje računa", "Trajno briše profil, iskustva, projekte i sve prijave")}
+          {sectionHead(<ITrash size={20} />, "Delete account", "Permanently deletes your profile, experience, projects and all applications")}
 
           <div style={{ padding: "14px 16px", borderRadius: 12, background: "var(--rh-danger-soft)", border: "1px solid var(--rh-danger)", color: "var(--rh-danger)", fontSize: 13.5, lineHeight: 1.6, marginBottom: 16 }}>
-            Ova radnja je <strong>nepovratna</strong>. Svi tvoji podaci bit će trajno obrisani i račun se neće moći vratiti.
+            This action is <strong>nepovratna</strong>. All your data will be permanently deleted and the account cannot be recovered.
           </div>
 
           <label style={{ display: "block", fontSize: 13, fontWeight: 700, color: "var(--rh-text-2)", marginBottom: 8 }}>
-            Za potvrdu upiši svoj email: <span style={{ color: "var(--rh-text-3)", fontWeight: 600 }}>{email}</span>
+            Type your email to confirm: <span style={{ color: "var(--rh-text-3)", fontWeight: 600 }}>{email}</span>
           </label>
           <input
             type="email"
@@ -1798,7 +1861,7 @@ export default function DashboardApp({
             }}
           >
             <ITrash size={16} />
-            {isDeleting ? "Brišem…" : "Trajno obriši račun"}
+            {isDeleting ? "Deleting…" : "Permanently delete account"}
           </button>
         </section>
       </div>
@@ -1818,25 +1881,25 @@ export default function DashboardApp({
       </main>
 
       {!sidebarOpen && (
-        <button type="button" onClick={() => setSidebarOpen(true)} title="Otvori izbornik" style={{ position: "fixed", top: "50%", left: 0, transform: "translateY(-50%)", zIndex: 30, width: 26, height: 66, borderRadius: "0 13px 13px 0", border: "1px solid var(--rh-border)", borderLeft: "none", background: "var(--rh-surface)", color: "var(--rh-accent)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "3px 0 12px rgba(var(--rh-shadow-rgb),.16)" }}>
+        <button type="button" onClick={() => setSidebarOpen(true)} title="Open menu" style={{ position: "fixed", top: "50%", left: 0, transform: "translateY(-50%)", zIndex: 30, width: 26, height: 66, borderRadius: "0 13px 13px 0", border: "1px solid var(--rh-border)", borderLeft: "none", background: "var(--rh-surface)", color: "var(--rh-accent)", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "3px 0 12px rgba(var(--rh-shadow-rgb),.16)" }}>
           <IChevronRight size={18} />
         </button>
       )}
 
-      {/* Pregled profila (CV) */}
+      {/* Profile preview (CV) */}
       {previewOpen && (
         <div onClick={() => setPreviewOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 60, background: "rgba(15,31,68,.5)", backdropFilter: "blur(3px)", display: "flex", alignItems: "flex-start", justifyContent: "center", padding: "40px 20px", overflowY: "auto" }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: "100%", maxWidth: 760, background: "var(--rh-surface)", borderRadius: 20, boxShadow: "0 30px 70px rgba(var(--rh-shadow-rgb),.4)", animation: "rh-pop .3s ease both", marginBottom: 40 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 22px", borderBottom: "1px solid var(--rh-border-soft)", background: "var(--rh-surface)", borderRadius: "20px 20px 0 0" }}>
               <div style={{ fontSize: 15, fontWeight: 800, color: "var(--rh-text)", display: "flex", alignItems: "center", gap: 9 }}>
                 <IFile size={18} color="var(--rh-accent)" />
-                Pregled profila
+                Profile preview
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <a href="/dashboard/cv" target="_blank" rel="noreferrer" className="rh-btn" style={{ display: "inline-flex", alignItems: "center", gap: 7, padding: "8px 14px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))", color: "#fff", fontSize: 13, fontWeight: 700, textDecoration: "none" }}>
-                  <IDownload size={15} /> Preuzmi PDF
+                  <IDownload size={15} /> Download PDF
                 </a>
-                <button type="button" onClick={() => setPreviewOpen(false)} className="rh-icon" style={iconBtn} title="Zatvori (Esc)">
+                <button type="button" onClick={() => setPreviewOpen(false)} className="rh-icon" style={iconBtn} title="Close (Esc)">
                   <IX />
                 </button>
               </div>
@@ -1860,7 +1923,7 @@ export default function DashboardApp({
                   {expList.map((exp) => (
                     <div key={exp.id} style={{ marginBottom: 13 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{[exp.position, exp.company].filter(Boolean).join(" · ") || "—"}</span>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{[exp.position, exp.company].filter(Boolean).join(" · ") || ","}</span>
                         {exp.period && <span style={{ fontSize: 12, color: "var(--rh-text-3)", whiteSpace: "nowrap" }}>{exp.period}</span>}
                       </div>
                       {exp.description && <p style={{ margin: "5px 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--rh-text-2)" }}>{exp.description}</p>}
@@ -1875,7 +1938,7 @@ export default function DashboardApp({
                   {eduList.map((ed) => (
                     <div key={ed.id} style={{ marginBottom: 11 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{[ed.title, ed.institution].filter(Boolean).join(" · ") || "—"}</span>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{[ed.title, ed.institution].filter(Boolean).join(" · ") || ","}</span>
                         {ed.period && <span style={{ fontSize: 12, color: "var(--rh-text-3)", whiteSpace: "nowrap" }}>{ed.period}</span>}
                       </div>
                     </div>
@@ -1889,7 +1952,7 @@ export default function DashboardApp({
                   {projList.map((p) => (
                     <div key={p.id} style={{ marginBottom: 12 }}>
                       <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{p.name || "—"}</span>
+                        <span style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text)" }}>{p.name || ","}</span>
                         {p.period && <span style={{ fontSize: 12, color: "var(--rh-text-3)", whiteSpace: "nowrap" }}>{p.period}</span>}
                       </div>
                       {p.description && <p style={{ margin: "5px 0 0", fontSize: 13, lineHeight: 1.6, color: "var(--rh-text-2)" }}>{p.description}</p>}
@@ -1945,7 +2008,7 @@ export default function DashboardApp({
 
               {hobbies.length > 0 && (
                 <>
-                  <div style={cvH}>HOBIJI</div>
+                  <div style={cvH}>HOBBIES</div>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: 7 }}>
                     {hobbies.map((h, i) => (
                       <span key={`${h}-${i}`} style={cvChip}>{h}</span>
@@ -1955,7 +2018,7 @@ export default function DashboardApp({
               )}
 
               {!bio.trim() && expList.length === 0 && eduList.length === 0 && projList.length === 0 && skillCats.length === 0 && hobbies.length === 0 && certificates.length === 0 && strengths.length === 0 && (
-                <p style={{ margin: "22px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Profil je još prazan — popuni podatke pa će se ovdje prikazati kao životopis.</p>
+                <p style={{ margin: "22px 0 0", fontSize: 13.5, color: "var(--rh-text-3)" }}>Your profile is still empty. Fill in your details and they will show up here as a resume.</p>
               )}
             </div>
           </div>

@@ -1,10 +1,10 @@
-// app/components/LegalPage.tsx — zajednički okvir za pravne stranice
+// app/components/LegalPage.tsx - shared shell for legal pages
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export const LEGAL_UPDATED = "15. kolovoza 2026.";
+export const LEGAL_UPDATED = "15 August 2026";
 
-/** Email za pravne upite. Postavi NEXT_PUBLIC_CONTACT_EMAIL u .env.local. */
+/** Contact email for legal enquiries. Set NEXT_PUBLIC_CONTACT_EMAIL in .env.local. */
 export const CONTACT_EMAIL = process.env.NEXT_PUBLIC_CONTACT_EMAIL || "";
 
 export function LegalSection({ title, children }: { title: string; children: ReactNode }) {
@@ -45,7 +45,7 @@ export default function LegalPage({
             href="/"
             style={{ fontSize: 13.5, fontWeight: 700, color: "var(--rh-text-2)", textDecoration: "none" }}
           >
-            ← Natrag na naslovnicu
+            &larr; Back to home
           </Link>
         </div>
       </header>
@@ -55,7 +55,7 @@ export default function LegalPage({
           {title}
         </h1>
         <p style={{ fontSize: 13.5, color: "var(--rh-text-3)", margin: "0 0 8px" }}>
-          Zadnja izmjena: {LEGAL_UPDATED}
+          Last updated: {LEGAL_UPDATED}
         </p>
         <p style={{ fontSize: 15.5, lineHeight: 1.75, color: "var(--rh-text-2)", margin: "0 0 40px" }}>{intro}</p>
 
@@ -72,9 +72,9 @@ export default function LegalPage({
         </div>
 
         <div style={{ display: "flex", gap: 18, marginTop: 28, fontSize: 13.5, fontWeight: 700 }}>
-          <Link href="/terms" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Uvjeti korištenja</Link>
-          <Link href="/privacy" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Pravila privatnosti</Link>
-          <Link href="/cookies" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Kolačići</Link>
+          <Link href="/terms" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Terms of Use</Link>
+          <Link href="/privacy" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Privacy Policy</Link>
+          <Link href="/cookies" style={{ color: "var(--rh-accent)", textDecoration: "none" }}>Cookies</Link>
         </div>
       </main>
     </div>

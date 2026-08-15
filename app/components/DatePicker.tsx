@@ -108,12 +108,12 @@ export default function DatePicker({
           width: "100%",
           padding: "12px 16px",
           borderRadius: 10,
-          border: "1.5px solid #D1D5DB",
+          border: "1.5px solid var(--rh-border-strong)",
           fontFamily: "inherit",
           fontSize: 15,
           cursor: "pointer",
-          backgroundColor: "#FFFFFF",
-          color: "#13234A",
+          backgroundColor: "var(--rh-surface)",
+          color: "var(--rh-text)",
           transition: "all 0.2s ease",
           boxSizing: "border-box",
         }}
@@ -127,10 +127,10 @@ export default function DatePicker({
             top: "calc(100% + 8px)",
             left: 0,
             width: 320,
-            background: "#fff",
-            border: "1px solid #E5E7EB",
+            background: "var(--rh-surface)",
+            border: "1px solid var(--rh-border)",
             borderRadius: 14,
-            boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+            boxShadow: "0 10px 40px rgba(var(--rh-shadow-rgb),.3)",
             zIndex: 1000,
             padding: "20px",
           }}
@@ -151,7 +151,7 @@ export default function DatePicker({
                 height: 32,
                 border: "none",
                 borderRadius: 8,
-                background: "#F3F4F6",
+                background: "var(--rh-surface-3)",
                 cursor: "pointer",
                 fontSize: 18,
                 display: "flex",
@@ -159,8 +159,8 @@ export default function DatePicker({
                 justifyContent: "center",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#E5E7EB")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#F3F4F6")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--rh-border)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--rh-surface-3)")}
             >
               ←
             </button>
@@ -170,7 +170,7 @@ export default function DatePicker({
                 style={{
                   fontSize: 15,
                   fontWeight: 800,
-                  color: "#13234A",
+                  color: "var(--rh-text)",
                   marginBottom: 4,
                 }}
               >
@@ -190,7 +190,7 @@ export default function DatePicker({
                   style={{
                     padding: "4px 8px",
                     borderRadius: 6,
-                    border: "1px solid #E5E7EB",
+                    border: "1px solid var(--rh-border)",
                     fontSize: 12,
                     cursor: "pointer",
                   }}
@@ -207,7 +207,7 @@ export default function DatePicker({
                   style={{
                     padding: "4px 8px",
                     borderRadius: 6,
-                    border: "1px solid #E5E7EB",
+                    border: "1px solid var(--rh-border)",
                     fontSize: 12,
                     cursor: "pointer",
                   }}
@@ -228,7 +228,7 @@ export default function DatePicker({
                 height: 32,
                 border: "none",
                 borderRadius: 8,
-                background: "#F3F4F6",
+                background: "var(--rh-surface-3)",
                 cursor: "pointer",
                 fontSize: 18,
                 display: "flex",
@@ -236,8 +236,8 @@ export default function DatePicker({
                 justifyContent: "center",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.background = "#E5E7EB")}
-              onMouseLeave={(e) => (e.currentTarget.style.background = "#F3F4F6")}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "var(--rh-border)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--rh-surface-3)")}
             >
               →
             </button>
@@ -252,7 +252,7 @@ export default function DatePicker({
                   textAlign: "center",
                   fontSize: 11,
                   fontWeight: 800,
-                  color: "#8A94A6",
+                  color: "var(--rh-text-3)",
                   padding: "8px 0",
                 }}
               >
@@ -273,7 +273,7 @@ export default function DatePicker({
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: 13,
-                  color: "#D1D5DB",
+                  color: "var(--rh-border-strong)",
                   cursor: "default",
                 }}
               >
@@ -296,13 +296,13 @@ export default function DatePicker({
                   style={{
                     aspectRatio: "1",
                     borderRadius: 8,
-                    border: isSelected ? "2px solid #2563EB" : "1px solid #E5E7EB",
+                    border: isSelected ? "2px solid var(--rh-accent)" : "1px solid var(--rh-border)",
                     background: isSelected
-                      ? "linear-gradient(135deg,#3B82F6,#2563EB)"
+                      ? "linear-gradient(135deg,var(--rh-accent-2),var(--rh-accent))"
                       : isToday
-                        ? "#F3F4F6"
+                        ? "var(--rh-surface-3)"
                         : "#fff",
-                    color: isSelected ? "#fff" : "#13234A",
+                    color: isSelected ? "#fff" : "var(--rh-text)",
                     fontWeight: isSelected || isToday ? 700 : 500,
                     fontSize: 13,
                     cursor: "pointer",
@@ -310,14 +310,14 @@ export default function DatePicker({
                   }}
                   onMouseEnter={(e) => {
                     if (!isSelected) {
-                      e.currentTarget.style.background = "#F9FAFB";
-                      e.currentTarget.style.borderColor = "#D1D5DB";
+                      e.currentTarget.style.background = "var(--rh-surface-2)";
+                      e.currentTarget.style.borderColor = "var(--rh-border-strong)";
                     }
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) {
                       e.currentTarget.style.background = "#fff";
-                      e.currentTarget.style.borderColor = "#E5E7EB";
+                      e.currentTarget.style.borderColor = "var(--rh-border)";
                     }
                   }}
                 >
@@ -334,7 +334,7 @@ export default function DatePicker({
               gap: 8,
               marginTop: 16,
               paddingTop: 12,
-              borderTop: "1px solid #E5E7EB",
+              borderTop: "1px solid var(--rh-border)",
             }}
           >
             <button
@@ -347,9 +347,9 @@ export default function DatePicker({
                 flex: 1,
                 padding: "8px 12px",
                 borderRadius: 8,
-                border: "1px solid #E5E7EB",
-                background: "#fff",
-                color: "#2563EB",
+                border: "1px solid var(--rh-border)",
+                background: "var(--rh-surface)",
+                color: "var(--rh-accent)",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",
@@ -366,9 +366,9 @@ export default function DatePicker({
                 flex: 1,
                 padding: "8px 12px",
                 borderRadius: 8,
-                border: "1px solid #E5E7EB",
-                background: "#fff",
-                color: "#8A94A6",
+                border: "1px solid var(--rh-border)",
+                background: "var(--rh-surface)",
+                color: "var(--rh-text-3)",
                 fontWeight: 700,
                 fontSize: 12,
                 cursor: "pointer",

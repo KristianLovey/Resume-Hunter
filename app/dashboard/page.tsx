@@ -6,12 +6,34 @@ import DashboardApp from "./DashboardApp";
 
 const DEFAULT_SKILLS = {
   categories: [
-    { name: "Jezici", items: [] as string[] },
-    { name: "IT & tehnologije", items: [] as string[] },
-    { name: "Ekonomija & poslovanje", items: [] as string[] },
-    { name: "Ostalo", items: [] as string[] },
+    { name: "Languages", items: [] as string[] },
+    { name: "IT & technology", items: [] as string[] },
+    { name: "Business & finance", items: [] as string[] },
+    { name: "Other", items: [] as string[] },
   ],
 };
+
+// Profiles created before the UI moved to English still hold Croatian category
+// names. Rename them on read so nothing shows up in the old language. The user's
+// own items are untouched, and the rename persists the next time they save.
+const LEGACY_SKILL_CATEGORIES: Record<string, string> = {
+  Jezici: "Languages",
+  "IT & tehnologije": "IT & technology",
+  "Ekonomija & poslovanje": "Business & finance",
+  Dizajn: "Design",
+  Menadžment: "Management",
+  Ostalo: "Other",
+};
+
+function normalizeSkills(skills: { categories: { name: string; items: string[] }[] }) {
+  return {
+    ...skills,
+    categories: skills.categories.map((c) => ({
+      ...c,
+      name: LEGACY_SKILL_CATEGORIES[c.name] ?? c.name,
+    })),
+  };
+}
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -62,10 +84,10 @@ export default async function DashboardPage() {
     phone: profile?.phone ?? "",
     location: profile?.location ?? "",
     bio: profile?.bio ?? "",
-    default_tone: profile?.default_tone ?? "Profesionalan",
+    default_tone: profile?.default_tone ?? "Professional",
     skills:
       profile?.skills && Array.isArray(profile.skills.categories)
-        ? profile.skills
+        ? normalizeSkills(profile.skills)
         : DEFAULT_SKILLS,
     hobbies: Array.isArray(profile?.hobbies) ? profile.hobbies : [],
     certificates: Array.isArray(profile?.certificates) ? profile.certificates : [],

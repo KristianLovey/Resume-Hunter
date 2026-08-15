@@ -1,4 +1,4 @@
-// app/api/hunter/regenerate/route.ts — Regenerira CV s user editima kao context
+// app/api/hunter/regenerate/route.ts — regenerates the CV using the user's edits as context
 import { google } from "@ai-sdk/google";
 import { generateText, tool } from "ai";
 import { z } from "zod";
@@ -17,7 +17,7 @@ const REGENERATE_PROMPT = `You are Hunter, an expert career writer who improves 
 The candidate has edited their resume based on AI suggestions. Your job is to:
 1. Keep the candidate's edits as the primary content
 2. Refine and enhance their edits (better phrasing, stronger action verbs, better metrics)
-3. Maintain truthfulness — never fabricate metrics or experience
+3. Maintain truthfulness, never fabricate metrics or experience
 4. Re-apply the tailoring to the job posting (keywords, seniority level)
 
 ## CV BULLET RULES
@@ -32,7 +32,13 @@ The candidate has edited their resume based on AI suggestions. Your job is to:
 - One page, opening with genuine interest in this company/role
 - 1-2 middle paragraphs mapping candidate's experience to job requirements
 - Close politely with call to interview
-- Mirror job posting's keywords where truthfully applicable`;
+- Mirror job posting's keywords where truthfully applicable
+- Use the candidate's own words and phrasing, but refine for clarity and impact
+
+##SAFETY
+- Never fabricate experience, metrics, or achievements
+- Never make the CV say something the candidate's profile does not support
+- If the candidate's edits are missing information needed to tailor to the job posting, ask them to add it in their profile`;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -40,7 +46,7 @@ export async function POST(request: Request) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) {
-    return Response.json({ error: "Niste prijavljeni." }, { status: 401 });
+    return Response.json({ error: "You are not signed in." }, { status: 401 });
   }
 
   let body: {
@@ -52,16 +58,16 @@ export async function POST(request: Request) {
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Neispravan zahtjev." }, { status: 400 });
+    return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  const { applicationId, jobText = "", tone = "Profesionalan", userEdits } = body;
+  const { applicationId, jobText = "", userEdits } = body;
 
   if (!applicationId || !jobText) {
-    return Response.json({ error: "Nedostaju aplikacija i tekst oglasa." }, { status: 400 });
+    return Response.json({ error: "Missing application or job ad text." }, { status: 400 });
   }
 
-  // Dohvati aplikaciju da osiguraš ownership
+  // Fetch the application to enforce ownership.
   const { data: app, error: appError } = await supabase
     .from("applications")
     .select("parsed_job,match_breakdown")
@@ -70,10 +76,10 @@ export async function POST(request: Request) {
     .maybeSingle();
 
   if (appError || !app) {
-    return Response.json({ error: "Aplikacija nije pronađena." }, { status: 404 });
+    return Response.json({ error: "Application not found." }, { status: 404 });
   }
 
-  // Alat za refiniranje (sličan kao u originalnoj ruti, ali s editima kao input)
+  // Refinement tool: same shape as the main route, but takes the user's edits as input.
   const tools = {
     refineCV: tool({
       description:
@@ -108,14 +114,16 @@ export async function POST(request: Request) {
 Summary: ${userEdits?.summary || "N/A"}
 
 Experiences:
-${userEdits?.experiences
-  ?.map(
-    (e, i) =>
-      `${i + 1}. ${e.title}
+${
+  userEdits?.experiences
+    ?.map(
+      (e, i) =>
+        `${i + 1}. ${e.title}
    Bullets:
    ${e.bullets.map((b) => `   - ${b}`).join("\n")}`
-  )
-  .join("\n\n") || "N/A"}
+    )
+    .join("\n\n") || "N/A"
+}
 
 ## Job Posting
 ${jobText}
@@ -123,7 +131,7 @@ ${jobText}
 Now refine their CV using the refineCV tool.`,
     });
 
-    // Ekstrahiraj refiniran CV iz rezultata
+    // Pull the refined CV out of the tool results.
     const toolResults = (result as unknown as { steps?: { type: string; toolResult?: unknown }[] }).steps || [];
     const refinedResult = toolResults
       .find((s: { type: string; toolResult?: unknown }) => s.type === "tool-result")
@@ -132,10 +140,7 @@ Now refine their CV using the refineCV tool.`,
       | undefined;
 
     if (!refinedResult || !refinedResult.refinedSummary) {
-      return Response.json(
-        { error: "Nije moguće pročitati rezultate refiniranja." },
-        { status: 500 }
-      );
+      return Response.json({ error: "Could not read the refinement results." }, { status: 500 });
     }
 
     return Response.json({
@@ -147,7 +152,7 @@ Now refine their CV using the refineCV tool.`,
   } catch (e) {
     console.error("Regenerate error:", e);
     return Response.json(
-      { error: e instanceof Error ? e.message : "Greška pri regeneraciji" },
+      { error: e instanceof Error ? e.message : "Something went wrong while regenerating" },
       { status: 500 }
     );
   }

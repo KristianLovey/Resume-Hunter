@@ -40,7 +40,7 @@ async function authed() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) throw new Error("Niste prijavljeni.");
+  if (!user) throw new Error("You are not signed in.");
   return { supabase, user };
 }
 
@@ -76,10 +76,10 @@ export async function saveProfile(input: SaveProfileInput) {
 
   if (error) return { ok: false as const, message: error.message };
   revalidatePath("/dashboard");
-  return { ok: true as const, message: "Profil spremljen" };
+  return { ok: true as const, message: "Profile saved" };
 }
 
-/* ===================== Brisanje računa ===================== */
+/* ===================== Delete account ===================== */
 /**
  * Trajno briše korisnikove podatke i auth račun.
  * Traži potvrdu: klijent mora poslati točan email prijavljenog korisnika.
@@ -88,20 +88,20 @@ export async function deleteAccount(confirmEmail: string) {
   const { supabase, user } = await authed();
 
   if (!confirmEmail || confirmEmail.trim().toLowerCase() !== (user.email ?? "").toLowerCase()) {
-    return { ok: false as const, message: "Upisani email ne odgovara tvom računu." };
+    return { ok: false as const, message: "That email does not match your account." };
   }
 
   // Podaci prvo (RLS ih ograničava na vlasnika), pa auth račun.
   for (const table of ["applications", "projects", "education", "experiences", "profiles"]) {
     const column = table === "profiles" ? "id" : "user_id";
     const { error } = await supabase.from(table).delete().eq(column, user.id);
-    if (error) return { ok: false as const, message: `Brisanje (${table}): ${error.message}` };
+    if (error) return { ok: false as const, message: `Deleting (${table}): ${error.message}` };
   }
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) {
     await supabase.auth.signOut();
-    return { ok: false as const, message: "Podaci su obrisani, ali račun nije — nedostaje servisni ključ." };
+    return { ok: false as const, message: "Your data was deleted but the account was not: the service key is missing." };
   }
 
   // Admin API: brisanje auth korisnika ide preko servisnog ključa.
@@ -115,12 +115,12 @@ export async function deleteAccount(confirmEmail: string) {
 
   if (!res.ok) {
     const body = await res.text();
-    return { ok: false as const, message: `Račun nije obrisan: ${body.slice(0, 200)}` };
+    return { ok: false as const, message: `Account nije obrisan: ${body.slice(0, 200)}` };
   }
 
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  return { ok: true as const, message: "Račun je obrisan." };
+  return { ok: true as const, message: "Account je obrisan." };
 }
 
 /* ===================== Iskustvo ===================== */
@@ -173,7 +173,7 @@ export async function deleteExperience(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
-/* ===================== Obrazovanje ===================== */
+/* ===================== Education ===================== */
 export async function addEducation() {
   const { supabase, user } = await authed();
   await ensureProfile(supabase, user.id);
@@ -221,7 +221,7 @@ export async function deleteEducation(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
-/* ===================== Projekti ===================== */
+/* ===================== Projects ===================== */
 export async function addProject() {
   const { supabase, user } = await authed();
   await ensureProfile(supabase, user.id);
@@ -276,7 +276,7 @@ export async function deleteProject(formData: FormData) {
   revalidatePath("/dashboard");
 }
 
-/* ===================== Prijave (applications) ===================== */
+/* ===================== Applications (applications) ===================== */
 export async function deleteApplication(formData: FormData) {
   const { supabase, user } = await authed();
   const id = formData.get("id")?.toString();
@@ -353,7 +353,7 @@ export async function regenerateCv(
     .maybeSingle();
 
   if (appError || !app) {
-    return { success: false, error: "Aplikacija nije pronađena" };
+    return { success: false, error: "Application not found" };
   }
 
   try {
@@ -432,7 +432,7 @@ ${app.job_description}`,
     });
 
     if (!state.refinedSummary) {
-      return { success: false, error: "Nije moguće procesirati regeneraciju" };
+      return { success: false, error: "Could not process the regeneration" };
     }
 
     const regeneratedCV = {
@@ -455,6 +455,6 @@ ${app.job_description}`,
     return { success: true, data: regeneratedCV };
   } catch (e) {
     console.error("Regenerate error:", e);
-    return { success: false, error: e instanceof Error ? e.message : "Greška pri regeneraciji" };
+    return { success: false, error: e instanceof Error ? e.message : "Something went wrong while regenerating" };
   }
 }

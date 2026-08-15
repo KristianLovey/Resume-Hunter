@@ -70,33 +70,37 @@ body {
 }
 
 html[data-theme="dark"] {
-  --rh-bg: #0C1220;
-  --rh-surface: #161E2E;
-  --rh-surface-2: #1C2536;
-  --rh-surface-3: #232E42;
+  --rh-bg: #121A28;
+  --rh-surface: #1C2637;
+  --rh-surface-2: #232E42;
+  --rh-surface-3: #2B384E;
 
-  --rh-border: #2E3A50;
-  --rh-border-strong: #3D4B65;
-  --rh-border-soft: #262F42;
+  --rh-border: #3A4860;
+  --rh-border-strong: #4B5B76;
+  --rh-border-soft: #313E54;
 
-  --rh-text: #EAEFF8;
-  --rh-text-2: #C3CDDF;
-  --rh-text-3: #96A3B8;
-  --rh-text-4: #7D8AA0;
+  /* Tekst: podignut luminancijski kontrast prema površinama. */
+  --rh-text: #F2F6FC;
+  --rh-text-2: #D3DCEA;
+  --rh-text-3: #A9B6C9;
+  --rh-text-4: #93A1B6;
 
-  --rh-accent: #5B96FF;
-  --rh-accent-2: #74A8FF;
-  --rh-accent-dark: #3B7EF0;
-  --rh-accent-soft: #1D2C45;
-  --rh-accent-soft-2: #24375A;
-  --rh-accent-text: #A9C8FF;
+  --rh-accent: #7FB2FF;
+  --rh-accent-2: #9AC4FF;
+  --rh-accent-dark: #5A96F0;
+  --rh-accent-soft: #22334E;
+  --rh-accent-soft-2: #2C4266;
+  --rh-accent-text: #BFD8FF;
 
-  --rh-success: #3DD68C;
-  --rh-success-soft: #14301F;
-  --rh-warn: #E5A93A;
-  --rh-warn-soft: #33260D;
-  --rh-danger: #F87171;
-  --rh-danger-soft: #3A1A1A;
+  /* Status boje biraju se tako da se razlikuju i po svjetlini, ne samo po
+     tonu, pa ostaju čitljive kod deuteranopije/protanopije/tritanopije.
+     Uz boju uvijek ide i ikona ili tekst, boja nikad nije jedini signal. */
+  --rh-success: #5FE3A1; /* svijetla, hladno zelena */
+  --rh-success-soft: #10322A;
+  --rh-warn: #FFC65C; /* žuta, znatno svjetlija od plave */
+  --rh-warn-soft: #3A2C0E;
+  --rh-danger: #FF9B8A; /* topla lososna, razlikuje se svjetlinom od zelene */
+  --rh-danger-soft: #3E1F1C;
 
   --rh-shadow-rgb: 0, 0, 0;
   --rh-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.4),
@@ -105,9 +109,28 @@ html[data-theme="dark"] {
     0 26px 50px -22px rgba(0, 0, 0, 0.8);
 }
 
-html[data-theme="dark"] body {
+/* Body prati temu aplikacije, a ne postavku OS-a — inače crna pozadina viri
+   ispod svijetle teme kad je sustav u dark modeu. */
+body {
   background: var(--rh-bg);
   color: var(--rh-text);
+}
+
+html[data-theme="dark"] .rh-app ::-webkit-scrollbar-thumb {
+  background: var(--rh-border-strong);
+  background-clip: content-box;
+}
+html[data-theme="dark"] .rh-app input::placeholder,
+html[data-theme="dark"] .rh-app textarea::placeholder {
+  color: var(--rh-text-4);
+}
+html[data-theme="dark"] .rh-app select,
+html[data-theme="dark"] .rh-app option {
+  background: var(--rh-surface);
+  color: var(--rh-text);
+}
+html[data-theme="dark"] .rh-card:hover {
+  border-color: var(--rh-border-strong) !important;
 }
 
 /* ===================== Resume Hunter dashboard ===================== */

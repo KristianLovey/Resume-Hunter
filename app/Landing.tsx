@@ -76,19 +76,19 @@ const STEPS: { icon: React.ReactNode; tag: string; title: string; desc: string }
   {
     icon: <IUser size={26} color="#fff" />,
     tag: "Profile",
-    title: "Fill out your profile — just once",
+    title: "Fill out your profile, just once",
     desc: "Add your experience, education, skills, and what you enjoy. Hunter remembers it, so you never start from scratch again.",
   },
   {
     icon: <ISearch size={26} color="#fff" />,
     tag: "Analysis",
     title: "Paste the job ad, we'll do the rest",
-    desc: "Drop a link to the posting and Hunter reads what the employer is really after — then connects it to what you bring.",
+    desc: "Drop a link to the posting and Hunter reads what the employer is really after, then connects it to what you bring.",
   },
   {
     icon: <IFile size={26} color="#fff" />,
     tag: "Generation",
-    title: "Resume and cover letter — served up",
+    title: "Resume and cover letter, served up",
     desc: "Tailored to that exact job, highlighting what matters to that employer. You just review and hit send.",
   },
   {
@@ -101,7 +101,7 @@ const STEPS: { icon: React.ReactNode; tag: string; title: string; desc: string }
     icon: <IGrid size={26} color="#fff" />,
     tag: "Overview",
     title: "Every application in one place",
-    desc: "Your dashboard remembers every application and tone — so you always know where you applied and what you sent.",
+    desc: "Your dashboard remembers every application and tone, so you always know where you applied and what you sent.",
   },
 ];
 
@@ -124,7 +124,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
     </div>
   );
   const logo = (
-    <a href="/" aria-label="Resume Hunter — home" style={{ display: "inline-flex", textDecoration: "none" }}>
+    <a href="/" aria-label="Resume Hunter, home" style={{ display: "inline-flex", textDecoration: "none" }}>
       {logoImg}
     </a>
   );
@@ -244,7 +244,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
                         <span style={{ fontSize: 12, fontWeight: 800, color: "#13234A" }}>Cover letter</span>
                       </div>
                       <p style={{ margin: "0 0 7px", fontSize: 10.5, lineHeight: 1.6, color: "#566179" }}>Dear Hiring Manager,</p>
-                      <p style={{ margin: "0 0 7px", fontSize: 10.5, lineHeight: 1.6, color: "#7A879E" }}>I'm excited to apply for the Frontend Developer role at Infobip — your focus on reliable communication aligns closely with my experience.</p>
+                      <p style={{ margin: "0 0 7px", fontSize: 10.5, lineHeight: 1.6, color: "#7A879E" }}>I'm excited to apply for the Frontend Developer role at Infobip, your focus on reliable communication aligns closely with my experience.</p>
                       <p style={{ margin: 0, fontSize: 10.5, lineHeight: 1.6, color: "#7A879E" }}>In my recent work I cut page load times by 38%…</p>
                     </div>
                   </div>
@@ -260,7 +260,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
               </div>
             </div>
             <p style={{ margin: "24px auto 0", maxWidth: 560, textAlign: "center", fontSize: 15.5, lineHeight: 1.6, color: "#5E6B86", fontWeight: 500 }}>
-              This is exactly what you get: paste a job ad and Hunter hands back a resume and cover letter tailored to it — in seconds. No templates, no blank page. Just review and hit send.
+              This is exactly what you get: paste a job ad and Hunter hands back a resume and cover letter tailored to it, in seconds. No templates, no blank page. Just review and hit send.
             </p>
           </Reveal>
         </div>
@@ -273,11 +273,11 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             <div style={{ textAlign: "center", maxWidth: 620, margin: "0 auto 56px" }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: "#2563EB", letterSpacing: ".06em", textTransform: "uppercase", marginBottom: 12 }}>How it works</div>
               <h2 style={{ margin: 0, fontSize: "clamp(28px,4.4vw,42px)", fontWeight: 800, letterSpacing: "-.02em", color: "#0F1F44" }}>From profile to a ready application</h2>
-              <p style={{ margin: "14px 0 0", fontSize: 16.5, lineHeight: 1.6, color: "#5E6B86" }}>No fuss — five steps and your application is ready to send.</p>
+              <p style={{ margin: "14px 0 0", fontSize: 16.5, lineHeight: 1.6, color: "#5E6B86" }}>No fuss, five steps and your application is ready to send.</p>
             </div>
           </Reveal>
 
-          {/* stablo — svi koraci se otkrivaju odjednom */}
+          {/* stablo, svi koraci se otkrivaju odjednom */}
           <Reveal y={36}>
             <div style={{ position: "relative", maxWidth: 760, margin: "0 auto" }}>
               <div style={{ position: "absolute", left: 27, top: 24, bottom: 24, width: 2, background: "linear-gradient(#C9DBF8,#EAF1FE)" }} />
@@ -325,7 +325,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             <div style={{ position: "relative", overflow: "hidden", background: "linear-gradient(135deg,#2563EB,#1D4ED8)", borderRadius: 28, padding: "60px 32px", textAlign: "center", boxShadow: "0 30px 60px rgba(37,99,235,.3)" }}>
               <div style={{ position: "absolute", top: -80, right: -60, width: 280, height: 280, borderRadius: "50%", background: "rgba(255,255,255,.08)" }} />
               <h2 style={{ margin: 0, fontSize: "clamp(26px,4.4vw,40px)", fontWeight: 800, color: "#fff", letterSpacing: "-.02em", position: "relative" }}>Your next opportunity is waiting.</h2>
-              <p style={{ margin: "14px auto 0", fontSize: 16.5, lineHeight: 1.6, color: "rgba(255,255,255,.88)", maxWidth: 500, position: "relative" }}>Build your profile and leave the hard part to Hunter. You just apply — it does the writing.</p>
+              <p style={{ margin: "14px auto 0", fontSize: 16.5, lineHeight: 1.6, color: "rgba(255,255,255,.88)", maxWidth: 500, position: "relative" }}>Build your profile and leave the hard part to Hunter. You just apply, it does the writing.</p>
               <a href={ctaHref} className="rh-btn" style={{ ...btnPrimary, position: "relative", marginTop: 28, background: "#fff", color: "#2563EB", boxShadow: "0 12px 26px rgba(0,0,0,.18)" }}>
                 {ctaLabel}
                 <IArrow color="#2563EB" />
@@ -348,7 +348,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
                 </span>
               </div>
               <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.7, color: "#5E6B86" }}>
-                AI agent that tailors your resume and cover letter to each job ad — so every application
+                AI agent that tailors your resume and cover letter to each job ad, so every application
                 actually fits the role.
               </p>
             </div>
@@ -378,7 +378,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             </div>
           </div>
 
-          {/* AI disclaimer — pošteno upozorenje, ne marketing */}
+          {/* AI disclaimer, pošteno upozorenje, ne marketing */}
           <div
             style={{
               marginTop: 34,
@@ -392,7 +392,7 @@ export default function Landing({ loggedIn }: { loggedIn: boolean }) {
             }}
           >
             Resume Hunter generates text with AI. Always review what it writes before sending it to an
-            employer — you are responsible for the content of your application. Match scores are an
+            employer, you are responsible for the content of your application. Match scores are an
             estimate, not an assessment of your suitability.
           </div>
 

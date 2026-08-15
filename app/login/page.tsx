@@ -1,4 +1,4 @@
-// app/login/page.tsx — Modern auth page in Resume Hunter style
+// app/login/page.tsx, Modern auth page in Resume Hunter style
 "use client";
 
 import { CSSProperties, useState } from "react";
@@ -164,7 +164,7 @@ export default function AuthPage() {
         }}
       />
 
-      {/* Left side — Info */}
+      {/* Left side, Info */}
       <div
         className="auth-left-side"
         style={{
@@ -245,7 +245,7 @@ export default function AuthPage() {
         </div>
       </div>
 
-      {/* Right side — Auth Form */}
+      {/* Right side, Auth Form */}
       <div
         className="auth-right-side"
         style={{

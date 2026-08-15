@@ -189,7 +189,7 @@ export async function POST(request: Request) {
         const edus = education ?? [];
         const projs = projects ?? [];
 
-        // tekstualni blobovi za širu analizu (iskustvo/projekti često spominju tehnologiju bez da je u "vještinama")
+        // tekstualni blobovi za širu analizu (iskustvo/projekti često spominju tehnologiju bez da je u "skills")
         const expText = exps.map((e) => `${e.position ?? ""} ${e.description ?? ""}`).join(" ").toLowerCase();
         const allText = [
           profile?.bio ?? "",
@@ -241,11 +241,11 @@ export async function POST(request: Request) {
         const score = Math.max(0, Math.min(100, Math.round(raw * 100)));
 
         const breakdown = [
-          { label: "Vještine", score: Math.round(c1 * 100), weight: 40 },
+          { label: "Skills", score: Math.round(c1 * 100), weight: 40 },
           { label: "Relevantnost iskustva", score: Math.round(c2 * 100), weight: 25 },
           { label: "Razina (seniority)", score: Math.round(c3 * 100), weight: 10 },
           { label: "Potpunost profila", score: Math.round(c4 * 100), weight: 10 },
-          { label: "Pokrivenost ključnih riječi", score: Math.round(c5 * 100), weight: 15 },
+          { label: "Keyword coverage", score: Math.round(c5 * 100), weight: 15 },
         ];
 
         collected.match = { score, matched, gaps, breakdown };
@@ -369,7 +369,7 @@ ${jobText}
     // Ako je nešto puklo, ali imamo generirani sadržaj, ipak ga vrati
     if (!collected.coverLetter) {
       return Response.json(
-        { error: e instanceof Error ? e.message : "Greška agenta." },
+        { error: e instanceof Error ? e.message : "Agent error." },
         { status: 500 }
       );
     }
